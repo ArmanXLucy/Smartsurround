@@ -49,6 +49,7 @@ import {
   signInWithEmailAndPassword,
   sendEmailVerification,
   sendPasswordResetEmail,
+  fetchSignInMethodsForEmail,
   onAuthStateChanged,
   signOut,
   updateProfile,
@@ -1708,41 +1709,54 @@ function AuthPage({ onAuthSuccess, onBack }) {
   const [passwordResetSent, setPasswordResetSent] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  async function handleForgotPassword() {
-    setError("");
-    setPasswordResetSent(false);
+ async function handleForgotPassword() {
+  setError("");
+  setPasswordResetSent(false);
 
-    const cleanEmail = email.trim().toLowerCase();
+  const cleanEmail = email.trim().toLowerCase();
 
-    if (!cleanEmail) {
-      setError("Please enter your email address first.");
+  if (!cleanEmail) {
+    setError("Please enter your email address first.");
+    return;
+  }
+
+  try {
+    setIsSubmitting(true);
+
+    // Check whether this email is registered
+    const methods = await fetchSignInMethodsForEmail(
+      firebaseAuth,
+      cleanEmail
+    );
+
+    if (!methods || methods.length === 0) {
+      setError("This email is not registered.");
       return;
     }
 
-    try {
-      setIsSubmitting(true);
+    // Email exists — send reset email
+    await sendPasswordResetEmail(firebaseAuth, cleanEmail);
 
-      await sendPasswordResetEmail(firebaseAuth, cleanEmail);
+    setPasswordResetSent(true);
 
-      setPasswordResetSent(true);
-    } catch (err) {
-      console.error("Password reset error:", err);
+  } catch (err) {
+    console.error("Password reset error:", err);
 
-      if (err?.code === "auth/invalid-email") {
-        setError("Please enter a valid email address.");
-      } else if (err?.code === "auth/user-not-found") {
-        setError("No account was found with this email address.");
-      } else if (err?.code === "auth/too-many-requests") {
-        setError("Too many attempts. Please try again later.");
-      } else if (err?.code === "auth/network-request-failed") {
-        setError("Network error. Please check your internet connection.");
-      } else {
-        setError("Unable to send password reset email.");
-      }
-    } finally {
-      setIsSubmitting(false);
+    if (err?.code === "auth/invalid-email") {
+      setError("Please enter a valid email address.");
+    } else if (err?.code === "auth/user-not-found") {
+      setError("This email is not registered.");
+    } else if (err?.code === "auth/too-many-requests") {
+      setError("Too many attempts. Please try again later.");
+    } else if (err?.code === "auth/network-request-failed") {
+      setError("Network error. Please check your internet connection.");
+    } else {
+      setError("Unable to send password reset email.");
     }
+  } finally {
+    setIsSubmitting(false);
   }
+}
   async function handleSubmit(e) {
     e.preventDefault();
 
