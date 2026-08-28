@@ -2,7 +2,6 @@
 
 @import "tailwindcss";
 
-
 /* =========================================================
    ROOT
 ========================================================= */
@@ -27,16 +26,13 @@
   --cream: #fbfaf8;
 }
 
-
 * {
   box-sizing: border-box;
 }
 
-
 html {
   scroll-behavior: smooth;
 }
-
 
 body {
   margin: 0;
@@ -47,23 +43,19 @@ body {
   color: var(--text);
 }
 
-
 a {
   color: inherit;
   text-decoration: none;
 }
 
-
 button {
   font-family: inherit;
 }
-
 
 ::selection {
   background: var(--orange);
   color: white;
 }
-
 
 /* =========================================================
    NAVBAR
@@ -80,7 +72,6 @@ button {
 
   padding: 18px 24px;
 }
-
 
 .navbar {
   width: min(1120px, 100%);
@@ -105,7 +96,6 @@ button {
     0 10px 40px rgba(60, 35, 20, 0.05);
 }
 
-
 .brand {
   display: flex;
   align-items: center;
@@ -114,7 +104,6 @@ button {
 
   font-weight: 700;
 }
-
 
 .brand-icon {
   width: 36px;
@@ -134,16 +123,13 @@ button {
     0 7px 20px rgba(255, 116, 23, 0.25);
 }
 
-
 .brand-name {
   font-weight: 700;
 }
 
-
 .brand-name-light {
   font-weight: 400;
 }
-
 
 .desktop-nav {
   display: flex;
@@ -151,7 +137,6 @@ button {
 
   gap: 28px;
 }
-
 
 .desktop-nav a {
   font-size: 13px;
@@ -161,11 +146,9 @@ button {
   transition: 0.25s ease;
 }
 
-
 .desktop-nav a:hover {
   color: var(--text);
 }
-
 
 .nav-pdf-link {
   display: flex;
@@ -188,11 +171,9 @@ button {
   transition: 0.25s ease;
 }
 
-
 .nav-pdf-link:hover {
   color: var(--orange);
 }
-
 
 .nav-button {
   display: flex;
@@ -217,14 +198,12 @@ button {
   transition: 0.25s ease;
 }
 
-
 .nav-button:hover {
   transform: translateY(-2px);
 
   box-shadow:
     0 12px 30px rgba(255, 116, 23, 0.28);
 }
-
 
 .mobile-menu-button {
   display: none;
@@ -235,7 +214,6 @@ button {
 
   cursor: pointer;
 }
-
 
 .mobile-menu {
   width: min(1120px, 100%);
@@ -253,7 +231,6 @@ button {
   backdrop-filter: blur(20px);
 }
 
-
 .mobile-menu a {
   display: block;
 
@@ -261,7 +238,6 @@ button {
 
   font-size: 14px;
 }
-
 
 .mobile-menu-cta {
   display: flex;
@@ -293,13 +269,11 @@ button {
   cursor: pointer;
 }
 
-
 .mobile-menu-cta.secondary {
   color: var(--text);
 
   background: rgba(33, 20, 15, 0.05);
 }
-
 
 /* =========================================================
    HERO
@@ -314,7 +288,6 @@ button {
 
   padding: 145px 24px 110px;
 }
-
 
 .hero-grid {
   position: absolute;
@@ -345,7 +318,6 @@ button {
   opacity: 0.65;
 }
 
-
 .hero-glow {
   position: absolute;
 
@@ -355,7 +327,6 @@ button {
 
   pointer-events: none;
 }
-
 
 .glow-one {
   width: 500px;
@@ -369,7 +340,6 @@ button {
   background: rgba(255, 184, 209, 0.28);
 }
 
-
 .glow-two {
   width: 550px;
   height: 550px;
@@ -379,7 +349,6 @@ button {
 
   background: rgba(255, 180, 130, 0.2);
 }
-
 
 .hero-content {
   position: relative;
@@ -392,7 +361,6 @@ button {
 
   text-align: center;
 }
-
 
 .announcement {
   display: inline-flex;
@@ -415,7 +383,6 @@ button {
   backdrop-filter: blur(10px);
 }
 
-
 .announcement-dot {
   width: 8px;
   height: 8px;
@@ -427,7 +394,6 @@ button {
   box-shadow:
     0 0 0 5px rgba(255,116,23,0.08);
 }
-
 
 .hero h1 {
   margin: 25px 0 0;
@@ -447,7 +413,6 @@ button {
   font-weight: 600;
 }
 
-
 .hero-highlight {
   background: linear-gradient(
     100deg,
@@ -465,7 +430,6 @@ button {
   animation: gradientMove 6s linear infinite;
 }
 
-
 @keyframes gradientMove {
 
   to {
@@ -473,7 +437,6 @@ button {
   }
 
 }
-
 
 .hero-description {
   max-width: 720px;
@@ -487,7 +450,6 @@ button {
   line-height: 1.65;
 }
 
-
 .hero-description.second {
   max-width: 690px;
 
@@ -498,7 +460,6 @@ button {
   color: rgba(120,109,104,0.8);
 }
 
-
 .hero-buttons {
   display: flex;
 
@@ -508,7 +469,6 @@ button {
 
   margin-top: 30px;
 }
-
 
 .primary-button {
   display: inline-flex;
@@ -535,14 +495,12 @@ button {
   transition: 0.25s ease;
 }
 
-
 .primary-button:hover {
   transform: translateY(-3px);
 
   box-shadow:
     0 18px 38px rgba(255, 116, 23, 0.3);
 }
-
 
 .secondary-button {
   display: inline-flex;
@@ -564,13 +522,11 @@ button {
   transition: 0.25s ease;
 }
 
-
 .secondary-button:hover {
   background: white;
 
   transform: translateY(-2px);
 }
-
 
 .hero-trust {
   display: flex;
@@ -589,13 +545,11 @@ button {
   font-size: 12px;
 }
 
-
 .trust-icons {
   display: flex;
 
   margin-right: 4px;
 }
-
 
 .trust-circle {
   width: 30px;
@@ -616,21 +570,17 @@ button {
   background: #5f5048;
 }
 
-
 .trust-circle:nth-child(2) {
   background: #d98759;
 }
-
 
 .trust-circle:nth-child(3) {
   background: #a66e54;
 }
 
-
 .trust-divider {
   opacity: 0.3;
 }
-
 
 /* =========================================================
    DASHBOARD
@@ -645,7 +595,6 @@ button {
 
   margin: 90px auto 0;
 }
-
 
 .dashboard-glow {
   position: absolute;
@@ -663,7 +612,6 @@ button {
   z-index: -1;
 }
 
-
 .dashboard {
   overflow: hidden;
 
@@ -679,7 +627,6 @@ button {
     0 35px 100px rgba(74, 42, 24, 0.12);
 }
 
-
 .dashboard-topbar {
   display: flex;
   align-items: center;
@@ -693,13 +640,11 @@ button {
   border-radius: 22px 22px 0 0;
 }
 
-
 .browser-dots {
   display: flex;
 
   gap: 5px;
 }
-
 
 .browser-dots span {
   width: 8px;
@@ -709,7 +654,6 @@ button {
 
   background: #d7d0ca;
 }
-
 
 .dashboard-url {
   padding: 6px 40px;
@@ -723,7 +667,6 @@ button {
   font-size: 9px;
 }
 
-
 .dashboard-status {
   display: flex;
   align-items: center;
@@ -734,7 +677,6 @@ button {
 
   font-size: 9px;
 }
-
 
 .dashboard-status span,
 .dashboard-live span {
@@ -749,7 +691,6 @@ button {
     0 0 0 4px rgba(93,189,115,0.1);
 }
 
-
 .dashboard-body {
   display: flex;
 
@@ -759,7 +700,6 @@ button {
 
   background: #f5f2ee;
 }
-
 
 .dashboard-sidebar {
   width: 155px;
@@ -775,7 +715,6 @@ button {
   border: 1px solid rgba(33,20,15,0.06);
 }
 
-
 .side-logo {
   display: flex;
   align-items: center;
@@ -788,7 +727,6 @@ button {
 
   font-weight: 700;
 }
-
 
 .mini-logo {
   width: 22px;
@@ -805,7 +743,6 @@ button {
   background: var(--orange);
 }
 
-
 .sidebar-title {
   margin: 12px 7px 7px;
 
@@ -818,11 +755,9 @@ button {
   letter-spacing: 0.12em;
 }
 
-
 .second-title {
   margin-top: 24px;
 }
-
 
 .side-link {
   display: flex;
@@ -839,7 +774,6 @@ button {
   font-size: 9px;
 }
 
-
 .side-link.active {
   color: white;
 
@@ -849,7 +783,6 @@ button {
     0 5px 12px rgba(33,20,15,0.15);
 }
 
-
 .dashboard-main {
   flex: 1;
 
@@ -858,7 +791,6 @@ button {
   padding: 12px;
 }
 
-
 .dashboard-heading {
   display: flex;
 
@@ -866,7 +798,6 @@ button {
 
   justify-content: space-between;
 }
-
 
 .small-label,
 .card-label {
@@ -879,7 +810,6 @@ button {
   letter-spacing: 0.1em;
 }
 
-
 .dashboard-heading h3 {
   margin: 5px 0 2px;
 
@@ -888,7 +818,6 @@ button {
   letter-spacing: -0.03em;
 }
 
-
 .dashboard-heading p {
   margin: 0;
 
@@ -896,7 +825,6 @@ button {
 
   font-size: 8px;
 }
-
 
 .dashboard-live {
   display: flex;
@@ -917,7 +845,6 @@ button {
   font-weight: 600;
 }
 
-
 .monitor-cards {
   display: grid;
 
@@ -927,7 +854,6 @@ button {
 
   margin-top: 14px;
 }
-
 
 .monitor-card {
   position: relative;
@@ -942,7 +868,6 @@ button {
 
   background: white;
 }
-
 
 .monitor-icon {
   width: 25px;
@@ -959,18 +884,15 @@ button {
   background: #fff0e7;
 }
 
-
 .monitor-icon svg {
   width: 13px;
 }
-
 
 .monitor-card h5 {
   margin: 11px 0 3px;
 
   font-size: 10px;
 }
-
 
 .monitor-card p {
   max-width: 130px;
@@ -984,7 +906,6 @@ button {
   line-height: 1.5;
 }
 
-
 .card-arrow {
   position: absolute;
 
@@ -993,7 +914,6 @@ button {
 
   color: #c1b9b3;
 }
-
 
 .dashboard-lower {
   display: grid;
@@ -1004,7 +924,6 @@ button {
 
   margin-top: 7px;
 }
-
 
 .ai-card,
 .location-card {
@@ -1019,7 +938,6 @@ button {
   background: white;
 }
 
-
 .card-header {
   display: flex;
 
@@ -1028,13 +946,11 @@ button {
   justify-content: space-between;
 }
 
-
 .card-header h4 {
   margin: 4px 0 0;
 
   font-size: 13px;
 }
-
 
 .ai-icon,
 .location-icon {
@@ -1052,7 +968,6 @@ button {
   background: #fff0e7;
 }
 
-
 .ai-visual {
   position: relative;
 
@@ -1061,7 +976,6 @@ button {
 
   margin: 16px auto 0;
 }
-
 
 .ai-orbit {
   position: absolute;
@@ -1078,7 +992,6 @@ button {
   animation: orbitPulse 4s ease-in-out infinite;
 }
 
-
 .orbit-one {
   width: 110px;
   height: 70px;
@@ -1087,7 +1000,6 @@ button {
     translate(-50%, -50%)
     rotate(20deg);
 }
-
 
 .orbit-two {
   width: 75px;
@@ -1099,7 +1011,6 @@ button {
 
   animation-delay: 0.7s;
 }
-
 
 @keyframes orbitPulse {
 
@@ -1113,7 +1024,6 @@ button {
   }
 
 }
-
 
 .ai-center {
   position: absolute;
@@ -1140,7 +1050,6 @@ button {
     0 10px 30px rgba(255,116,23,0.3);
 }
 
-
 .ai-footer {
   display: flex;
 
@@ -1157,11 +1066,9 @@ button {
   font-size: 7px;
 }
 
-
 .ai-active {
   color: #4a9d61;
 }
-
 
 .map-placeholder {
   position: relative;
@@ -1177,7 +1084,6 @@ button {
   background:
     #f0eeeb;
 }
-
 
 .map-grid {
   position: absolute;
@@ -1198,7 +1104,6 @@ button {
   background-size: 25px 25px;
 }
 
-
 .map-road {
   position: absolute;
 
@@ -1212,7 +1117,6 @@ button {
     0 0 0 1px rgba(33,20,15,0.04);
 }
 
-
 .road-one {
   width: 150%;
 
@@ -1221,7 +1125,6 @@ button {
 
   transform: rotate(17deg);
 }
-
 
 .road-two {
   width: 130%;
@@ -1232,7 +1135,6 @@ button {
   transform: rotate(-35deg);
 }
 
-
 .road-three {
   width: 100%;
 
@@ -1241,7 +1143,6 @@ button {
 
   transform: rotate(-55deg);
 }
-
 
 .map-pin {
   position: absolute;
@@ -1270,7 +1171,6 @@ button {
     0 10px 25px rgba(255,116,23,0.25);
 }
 
-
 .event-row {
   display: grid;
 
@@ -1280,7 +1180,6 @@ button {
 
   margin-top: 7px;
 }
-
 
 .event-item {
   display: flex;
@@ -1297,7 +1196,6 @@ button {
 
   background: white;
 }
-
 
 .event-icon {
   width: 26px;
@@ -1316,18 +1214,15 @@ button {
   background: #f4f1ee;
 }
 
-
 .event-icon svg {
   width: 13px;
 }
-
 
 .event-item strong {
   display: block;
 
   font-size: 8px;
 }
-
 
 .event-item span {
   display: block;
@@ -1338,7 +1233,6 @@ button {
 
   font-size: 6px;
 }
-
 
 .event-check {
   width: 19px;
@@ -1356,7 +1250,6 @@ button {
 
   background: #eaf6ed;
 }
-
 
 .floating-card {
   position: absolute;
@@ -1382,20 +1275,17 @@ button {
   backdrop-filter: blur(12px);
 }
 
-
 .floating-left {
   left: -30px;
 
   bottom: 80px;
 }
 
-
 .floating-right {
   right: -30px;
 
   top: 90px;
 }
-
 
 .floating-icon {
   width: 34px;
@@ -1412,11 +1302,9 @@ button {
   background: #6f5ce6;
 }
 
-
 .floating-icon.orange {
   background: var(--orange);
 }
-
 
 .floating-card span {
   display: block;
@@ -1426,7 +1314,6 @@ button {
   font-size: 8px;
 }
 
-
 .floating-card strong {
   display: block;
 
@@ -1434,7 +1321,6 @@ button {
 
   font-size: 11px;
 }
-
 
 /* =========================================================
    GENERAL SECTIONS
@@ -1445,7 +1331,6 @@ button {
 
   margin: auto;
 }
-
 
 .section-tag {
   display: flex;
@@ -1462,14 +1347,12 @@ button {
   letter-spacing: 0.12em;
 }
 
-
 .section-tag span {
   width: 25px;
   height: 1px;
 
   background: var(--orange);
 }
-
 
 /* =========================================================
    ABOUT
@@ -1485,13 +1368,11 @@ button {
   background: #fff;
 }
 
-
 .about-section .section-container {
   position: relative;
 
   z-index: 1;
 }
-
 
 .about-bg {
   position: absolute;
@@ -1502,7 +1383,6 @@ button {
 
   pointer-events: none;
 }
-
 
 .about-bg-grid {
   position: absolute;
@@ -1531,7 +1411,6 @@ button {
   animation: aboutGridDrift 26s linear infinite;
 }
 
-
 @keyframes aboutGridDrift {
 
   from {
@@ -1544,7 +1423,6 @@ button {
 
 }
 
-
 .about-bg-blob {
   position: absolute;
 
@@ -1552,7 +1430,6 @@ button {
 
   filter: blur(70px);
 }
-
 
 .about-bg-blob-one {
   width: 380px;
@@ -1564,7 +1441,6 @@ button {
   background: rgba(255, 155, 92, 0.16);
 }
 
-
 .about-bg-blob-two {
   width: 320px;
   height: 320px;
@@ -1574,7 +1450,6 @@ button {
 
   background: rgba(255, 184, 209, 0.14);
 }
-
 
 .about-ping {
   position: absolute;
@@ -1588,7 +1463,6 @@ button {
 
   box-shadow: 0 0 10px rgba(255, 116, 23, 0.5);
 }
-
 
 .about-ping::before {
   content: "";
@@ -1606,7 +1480,6 @@ button {
   animation-delay: var(--delay, 0s);
 }
 
-
 @keyframes aboutPingRing {
 
   0% {
@@ -1623,7 +1496,6 @@ button {
 
 }
 
-
 .about-grid {
   display: grid;
 
@@ -1633,7 +1505,6 @@ button {
 
   margin-top: 30px;
 }
-
 
 .about-grid h2,
 .features-heading h2,
@@ -1655,7 +1526,6 @@ button {
   letter-spacing: -0.055em;
 }
 
-
 .about-grid h2 span,
 .features-heading h2 span,
 .how-heading h2 span,
@@ -1664,7 +1534,6 @@ button {
   color: #b0a49d;
 }
 
-
 .about-grid p {
   color: #7b706a;
 
@@ -1672,7 +1541,6 @@ button {
 
   line-height: 1.8;
 }
-
 
 .about-grid .large-paragraph {
   margin-top: 0;
@@ -1684,13 +1552,11 @@ button {
   line-height: 1.65;
 }
 
-
 .about-left {
   display: flex;
 
   flex-direction: column;
 }
-
 
 .about-visual {
   position: relative;
@@ -1713,7 +1579,6 @@ button {
     rgba(255, 255, 255, 0)
   );
 }
-
 
 .about-visual-grid {
   position: absolute;
@@ -1740,7 +1605,6 @@ button {
   );
 }
 
-
 .about-visual-lines {
   position: absolute;
 
@@ -1750,7 +1614,6 @@ button {
   height: 100%;
 }
 
-
 .about-visual-lines line {
   stroke: rgba(33, 20, 15, 0.12);
 
@@ -1758,7 +1621,6 @@ button {
 
   stroke-dasharray: 4 5;
 }
-
 
 .radar-ring {
   position: absolute;
@@ -1777,7 +1639,6 @@ button {
 
   animation: radarPulse 3.2s ease-out infinite;
 }
-
 
 .radar-sweep {
   position: absolute;
@@ -1803,7 +1664,6 @@ button {
   animation: radarSweepSpin 4s linear infinite;
 }
 
-
 @keyframes radarSweepSpin {
 
   to {
@@ -1812,16 +1672,13 @@ button {
 
 }
 
-
 .ring-b {
   animation-delay: 1.05s;
 }
 
-
 .ring-c {
   animation-delay: 2.1s;
 }
-
 
 @keyframes radarPulse {
 
@@ -1838,7 +1695,6 @@ button {
   }
 
 }
-
 
 .radar-core {
   position: absolute;
@@ -1865,7 +1721,6 @@ button {
 
   box-shadow: 0 18px 40px rgba(255, 116, 23, 0.35);
 }
-
 
 .about-float {
   position: absolute;
@@ -1894,14 +1749,12 @@ button {
   animation: aboutFloat 4.5s ease-in-out infinite;
 }
 
-
 .chip-wind {
   left: 8%;
   top: 14%;
 
   animation-delay: 0s;
 }
-
 
 .chip-camera {
   right: 14%;
@@ -1910,7 +1763,6 @@ button {
   animation-delay: 0.5s;
 }
 
-
 .chip-map {
   right: 10%;
   bottom: 16%;
@@ -1918,14 +1770,12 @@ button {
   animation-delay: 1s;
 }
 
-
 .chip-mic {
   left: 22%;
   bottom: 12%;
 
   animation-delay: 1.5s;
 }
-
 
 @keyframes aboutFloat {
 
@@ -1940,7 +1790,6 @@ button {
 
 }
 
-
 .capability-grid {
   display: grid;
 
@@ -1953,11 +1802,9 @@ button {
   margin-top: 90px;
 }
 
-
 .capability {
   padding-top: 20px;
 }
-
 
 .capability-progress-track {
   position: relative;
@@ -1970,7 +1817,6 @@ button {
 
   overflow: hidden;
 }
-
 
 .capability-progress-fill {
   position: absolute;
@@ -1991,7 +1837,6 @@ button {
   box-shadow: 0 0 8px rgba(255, 116, 23, 0.5);
 }
 
-
 .capability-arrow {
   display: flex;
   align-items: center;
@@ -2006,20 +1851,17 @@ button {
   opacity: 0.55;
 }
 
-
 .capability > span {
   color: #aaa09a;
 
   font-size: 11px;
 }
 
-
 .capability h3 {
   margin: 35px 0 8px;
 
   font-size: 20px;
 }
-
 
 .capability p {
   margin: 0;
@@ -2031,7 +1873,6 @@ button {
   line-height: 1.65;
 }
 
-
 /* =========================================================
    FEATURES
 ========================================================= */
@@ -2042,7 +1883,6 @@ button {
   background: #f6f3ef;
 }
 
-
 .features-heading {
   display: flex;
 
@@ -2052,7 +1892,6 @@ button {
 
   gap: 60px;
 }
-
 
 .features-heading > p {
   width: 340px;
@@ -2066,7 +1905,6 @@ button {
   line-height: 1.7;
 }
 
-
 .feature-grid {
   display: grid;
 
@@ -2076,7 +1914,6 @@ button {
 
   margin-top: 70px;
 }
-
 
 .feature-card {
   position: relative;
@@ -2094,14 +1931,12 @@ button {
   transition: 0.3s ease;
 }
 
-
 .feature-card:hover {
   transform: translateY(-6px);
 
   box-shadow:
     0 20px 50px rgba(33,20,15,0.08);
 }
-
 
 .feature-icon {
   width: 44px;
@@ -2118,7 +1953,6 @@ button {
   background: #fff0e7;
 }
 
-
 .feature-number {
   position: absolute;
 
@@ -2130,7 +1964,6 @@ button {
   font-size: 10px;
 }
 
-
 .feature-card h3 {
   margin-top: 95px;
 
@@ -2138,7 +1971,6 @@ button {
 
   letter-spacing: -0.025em;
 }
-
 
 .feature-card p {
   max-width: 280px;
@@ -2149,7 +1981,6 @@ button {
 
   line-height: 1.7;
 }
-
 
 .feature-arrow {
   position: absolute;
@@ -2171,7 +2002,6 @@ button {
   background: #f5f2ee;
 }
 
-
 /* =========================================================
    HOW IT WORKS
 ========================================================= */
@@ -2182,11 +2012,9 @@ button {
   background: white;
 }
 
-
 .how-heading {
   max-width: 700px;
 }
-
 
 .steps {
   position: relative;
@@ -2199,7 +2027,6 @@ button {
 
   margin-top: 80px;
 }
-
 
 .steps-track {
   position: absolute;
@@ -2215,7 +2042,6 @@ button {
 
   background: rgba(33, 20, 15, 0.1);
 }
-
 
 .steps-track-fill {
   position: absolute;
@@ -2235,7 +2061,6 @@ button {
 
   box-shadow: 0 0 10px rgba(255, 116, 23, 0.45);
 }
-
 
 .steps-track-runner {
   position: absolute;
@@ -2258,13 +2083,11 @@ button {
   transform: translateY(-50%);
 }
 
-
 .step {
   position: relative;
 
   z-index: 1;
 }
-
 
 .step-number {
   width: 45px;
@@ -2289,7 +2112,6 @@ button {
   transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
-
 .step-active .step-number {
   border-color: var(--orange);
 
@@ -2300,13 +2122,11 @@ button {
     0 12px 26px rgba(255, 116, 23, 0.35);
 }
 
-
 .step-done .step-number {
   border-color: rgba(255, 116, 23, 0.45);
 
   background: #21140f;
 }
-
 
 .step h3 {
   margin: 30px 0 8px;
@@ -2316,11 +2136,9 @@ button {
   transition: color 0.4s ease;
 }
 
-
 .step-active h3 {
   color: var(--orange);
 }
-
 
 .step p {
   margin: 0;
@@ -2331,7 +2149,6 @@ button {
 
   line-height: 1.7;
 }
-
 
 /* =========================================================
    AI SECTION
@@ -2349,7 +2166,6 @@ button {
   background: #21140f;
 }
 
-
 .ai-section-glow {
   position: absolute;
 
@@ -2366,7 +2182,6 @@ button {
   filter: blur(100px);
 }
 
-
 .ai-layout {
   position: relative;
 
@@ -2379,21 +2194,17 @@ button {
   align-items: center;
 }
 
-
 .section-tag.light {
   color: rgba(255,255,255,0.45);
 }
-
 
 .ai-layout h2 {
   margin-top: 25px;
 }
 
-
 .ai-layout h2 span {
   color: rgba(255,255,255,0.3);
 }
-
 
 .ai-layout > div:first-child > p {
   max-width: 520px;
@@ -2407,7 +2218,6 @@ button {
   line-height: 1.8;
 }
 
-
 .ai-points {
   display: flex;
 
@@ -2417,7 +2227,6 @@ button {
 
   margin-top: 30px;
 }
-
 
 .ai-points div {
   display: flex;
@@ -2431,11 +2240,9 @@ button {
   font-size: 13px;
 }
 
-
 .ai-points svg {
   color: #ff9b5c;
 }
-
 
 .ai-visual-large {
   position: relative;
@@ -2446,7 +2253,6 @@ button {
 
   margin: auto;
 }
-
 
 .ai-ring {
   position: absolute;
@@ -2463,7 +2269,6 @@ button {
   animation: aiRotate 12s linear infinite;
 }
 
-
 .ring-large {
   width: 390px;
   height: 190px;
@@ -2472,7 +2277,6 @@ button {
     translate(-50%, -50%)
     rotate(25deg);
 }
-
 
 .ring-medium {
   width: 280px;
@@ -2485,14 +2289,12 @@ button {
   animation-duration: 15s;
 }
 
-
 .ring-small {
   width: 200px;
   height: 200px;
 
   animation-duration: 9s;
 }
-
 
 @keyframes aiRotate {
 
@@ -2509,7 +2311,6 @@ button {
   }
 
 }
-
 
 .ai-core {
   position: absolute;
@@ -2541,7 +2342,6 @@ button {
     0 0 80px rgba(255,116,23,0.3);
 }
 
-
 .ai-core span {
   font-size: 9px;
 
@@ -2549,7 +2349,6 @@ button {
 
   letter-spacing: 0.15em;
 }
-
 
 .ai-node {
   position: absolute;
@@ -2572,30 +2371,25 @@ button {
   backdrop-filter: blur(10px);
 }
 
-
 .node-one {
   top: 35px;
   left: 55px;
 }
-
 
 .node-two {
   top: 70px;
   right: 45px;
 }
 
-
 .node-three {
   bottom: 45px;
   left: 80px;
 }
 
-
 .node-four {
   bottom: 75px;
   right: 70px;
 }
-
 
 /* =========================================================
    CONTACT
@@ -2604,7 +2398,6 @@ button {
 .contact-section {
   padding: 100px 24px;
 }
-
 
 .contact-box {
   position: relative;
@@ -2630,7 +2423,6 @@ button {
     #f3e9e1;
 }
 
-
 .contact-glow {
   position: absolute;
 
@@ -2649,7 +2441,6 @@ button {
   filter: blur(80px);
 }
 
-
 .contact-content {
   position: relative;
 
@@ -2659,7 +2450,6 @@ button {
 
   margin: auto;
 }
-
 
 .contact-icon {
   width: 50px;
@@ -2681,16 +2471,13 @@ button {
     0 10px 30px rgba(255,116,23,0.25);
 }
 
-
 .contact-content .section-tag {
   justify-content: center;
 }
 
-
 .contact-content h2 {
   margin-top: 25px;
 }
-
 
 .contact-content p {
   max-width: 620px;
@@ -2704,11 +2491,9 @@ button {
   line-height: 1.8;
 }
 
-
 .contact-content .primary-button {
   margin-top: 30px;
 }
-
 
 /* =========================================================
    FOOTER
@@ -2725,7 +2510,6 @@ button {
 
   background: #1c130f;
 }
-
 
 .footer-glow {
   position: absolute;
@@ -2751,7 +2535,6 @@ button {
   pointer-events: none;
 }
 
-
 .footer-container {
   position: relative;
 
@@ -2768,11 +2551,9 @@ button {
   gap: 80px;
 }
 
-
 .footer .brand {
   color: white;
 }
-
 
 .footer-brand p {
   max-width: 310px;
@@ -2786,7 +2567,6 @@ button {
   line-height: 1.7;
 }
 
-
 .footer-links {
   display: grid;
 
@@ -2794,7 +2574,6 @@ button {
 
   gap: 30px;
 }
-
 
 .footer-links div {
   display: flex;
@@ -2804,7 +2583,6 @@ button {
   gap: 10px;
 }
 
-
 .footer-links strong {
   margin-bottom: 5px;
 
@@ -2812,7 +2590,6 @@ button {
 
   font-size: 12px;
 }
-
 
 .footer-links a {
   color: rgba(255, 255, 255, 0.45);
@@ -2822,11 +2599,9 @@ button {
   transition: 0.2s ease;
 }
 
-
 .footer-links a:hover {
   color: var(--orange-light);
 }
-
 
 .footer-bottom {
   position: relative;
@@ -2850,7 +2625,6 @@ button {
   font-size: 10px;
 }
 
-
 /* =========================================================
    RESPONSIVE
 ========================================================= */
@@ -2862,26 +2636,21 @@ button {
     display: none;
   }
 
-
   .mobile-menu-button {
     display: flex;
   }
-
 
   .hero {
     padding-top: 125px;
   }
 
-
   .dashboard-sidebar {
     display: none;
   }
 
-
   .dashboard-url {
     display: none;
   }
-
 
   .about-grid,
   .ai-layout {
@@ -2890,28 +2659,23 @@ button {
     gap: 45px;
   }
 
-
   .about-visual {
     min-height: 220px;
 
     margin-top: 30px;
   }
 
-
   .capability-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-
 
   .capability-arrow {
     display: none;
   }
 
-
   .feature-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-
 
   .steps {
     grid-template-columns: repeat(2, 1fr);
@@ -2919,11 +2683,9 @@ button {
     gap: 45px;
   }
 
-
   .steps-track {
     display: none;
   }
-
 
   .footer-container {
     grid-template-columns: 1fr;
@@ -2931,28 +2693,23 @@ button {
 
 }
 
-
 @media (max-width: 650px) {
 
   .navbar-wrapper {
     padding: 12px;
   }
 
-
   .hero {
     padding: 120px 15px 70px;
   }
-
 
   .hero h1 {
     font-size: 48px;
   }
 
-
   .hero-description {
     font-size: 15px;
   }
-
 
   .hero-buttons {
     flex-direction: column;
@@ -2965,23 +2722,19 @@ button {
     margin-right: auto;
   }
 
-
   .hero-trust {
     gap: 5px;
 
     line-height: 1.8;
   }
 
-
   .trust-divider {
     display: none;
   }
 
-
   .dashboard-container {
     margin-top: 65px;
   }
-
 
   .dashboard {
     padding: 6px;
@@ -2989,46 +2742,37 @@ button {
     border-radius: 20px;
   }
 
-
   .dashboard-body {
     padding: 5px;
   }
-
 
   .dashboard-main {
     padding: 8px;
   }
 
-
   .monitor-cards {
     grid-template-columns: repeat(2, 1fr);
   }
-
 
   .dashboard-lower {
     grid-template-columns: 1fr;
   }
 
-
   .event-row {
     grid-template-columns: 1fr;
   }
-
 
   .ai-card {
     min-height: 220px;
   }
 
-
   .location-card {
     display: none;
   }
 
-
   .floating-card {
     display: none;
   }
-
 
   .section-container {
     width: min(
@@ -3037,14 +2781,12 @@ button {
     );
   }
 
-
   .about-section,
   .features-section,
   .how-section,
   .ai-section {
     padding: 100px 0;
   }
-
 
   .about-grid h2,
   .features-heading h2,
@@ -3054,23 +2796,19 @@ button {
     font-size: 43px;
   }
 
-
   .capability-grid {
     grid-template-columns: 1fr 1fr;
 
     gap: 25px 15px;
   }
 
-
   .feature-grid {
     grid-template-columns: 1fr;
   }
 
-
   .features-heading {
     display: block;
   }
-
 
   .features-heading > p {
     width: auto;
@@ -3078,47 +2816,38 @@ button {
     margin-top: 25px;
   }
 
-
   .steps {
     grid-template-columns: 1fr;
   }
-
 
   .ai-visual-large {
     height: 350px;
   }
 
-
   .ring-large {
     width: 320px;
   }
-
 
   .ring-medium {
     width: 230px;
     height: 300px;
   }
 
-
   .contact-section {
     padding: 50px 15px;
   }
-
 
   .contact-box {
     padding: 75px 20px;
   }
 
-
   .footer-container {
     gap: 45px;
   }
 
-
   .footer-links {
     grid-template-columns: 1fr 1fr;
   }
-
 
   .footer-bottom {
     flex-direction: column;
@@ -3127,7 +2856,6 @@ button {
   }
 
 }
-
 
 /* =========================================================
    NAV LOGIN / ACCOUNT
@@ -3159,7 +2887,6 @@ button {
   transition: 0.25s ease;
 }
 
-
 .nav-login-button:hover {
   transform: translateY(-2px);
 
@@ -3167,7 +2894,6 @@ button {
 
   color: var(--orange);
 }
-
 
 .nav-user {
   display: flex;
@@ -3177,7 +2903,6 @@ button {
 
   margin-left: 8px;
 }
-
 
 .nav-user-pill {
   display: flex;
@@ -3203,11 +2928,9 @@ button {
   transition: 0.25s ease;
 }
 
-
 .nav-user-pill:hover {
   border-color: var(--orange);
 }
-
 
 .nav-user-avatar {
   width: 26px;
@@ -3225,7 +2948,6 @@ button {
 
   flex-shrink: 0;
 }
-
 
 .nav-logout-button {
   width: 36px;
@@ -3248,13 +2970,11 @@ button {
   transition: 0.25s ease;
 }
 
-
 .nav-logout-button:hover {
   border-color: var(--orange);
 
   color: var(--orange);
 }
-
 
 .mobile-menu-login {
   display: flex;
@@ -3268,7 +2988,6 @@ button {
   cursor: pointer;
 }
 
-
 .mobile-menu-login.secondary {
   margin-top: 6px;
 
@@ -3276,7 +2995,6 @@ button {
 
   background: rgba(33, 20, 15, 0.05);
 }
-
 
 /* =========================================================
    AUTH PAGE (LOGIN / CREATE ACCOUNT)
@@ -3298,7 +3016,6 @@ button {
   background: var(--cream);
 }
 
-
 .auth-glow {
   position: absolute;
 
@@ -3319,7 +3036,6 @@ button {
   pointer-events: none;
 }
 
-
 .auth-box {
   position: relative;
 
@@ -3339,7 +3055,6 @@ button {
 
   box-shadow: 0 30px 80px rgba(74, 42, 24, 0.1);
 }
-
 
 .auth-back {
   display: inline-flex;
@@ -3363,11 +3078,9 @@ button {
   transition: 0.2s ease;
 }
 
-
 .auth-back:hover {
   color: var(--text);
 }
-
 
 .auth-brand {
   display: flex;
@@ -3378,11 +3091,9 @@ button {
   font-weight: 700;
 }
 
-
 .auth-heading {
   margin-top: 22px;
 }
-
 
 .auth-heading h2 {
   font-family: "Space Grotesk", sans-serif;
@@ -3391,7 +3102,6 @@ button {
 
   letter-spacing: -0.02em;
 }
-
 
 .auth-heading p {
   margin-top: 8px;
@@ -3402,7 +3112,6 @@ button {
 
   line-height: 1.6;
 }
-
 
 .auth-tabs {
   display: flex;
@@ -3415,7 +3124,6 @@ button {
 
   background: rgba(33, 20, 15, 0.05);
 }
-
 
 .auth-tabs button {
   flex: 1;
@@ -3438,7 +3146,6 @@ button {
   transition: 0.2s ease;
 }
 
-
 .auth-tabs button.active {
   background: white;
 
@@ -3446,7 +3153,6 @@ button {
 
   box-shadow: 0 4px 14px rgba(60, 35, 20, 0.08);
 }
-
 
 .auth-form {
   display: flex;
@@ -3457,7 +3163,6 @@ button {
 
   margin-top: 22px;
 }
-
 
 .auth-field {
   display: flex;
@@ -3471,7 +3176,6 @@ button {
 
   color: var(--text);
 }
-
 
 .auth-input {
   display: flex;
@@ -3492,13 +3196,11 @@ button {
   transition: 0.2s ease;
 }
 
-
 .auth-input:focus-within {
   border-color: var(--orange);
 
   color: var(--text);
 }
-
 
 .auth-input input {
   flex: 1;
@@ -3516,11 +3218,9 @@ button {
   font-family: inherit;
 }
 
-
 .auth-input input::placeholder {
   color: rgba(33, 20, 15, 0.32);
 }
-
 
 .auth-eye {
   display: flex;
@@ -3533,7 +3233,6 @@ button {
 
   cursor: pointer;
 }
-
 
 .auth-error {
   padding: 10px 14px;
@@ -3549,7 +3248,6 @@ button {
   font-size: 12.5px;
 }
 
-
 .auth-submit {
   justify-content: center;
 
@@ -3561,7 +3259,6 @@ button {
 
   cursor: pointer;
 }
-
 
 .auth-switch {
   display: flex;
@@ -3577,7 +3274,6 @@ button {
   font-size: 13px;
 }
 
-
 .auth-switch button {
   border: none;
 
@@ -3591,7 +3287,6 @@ button {
 
   cursor: pointer;
 }
-
 
 /* =========================================================
    AUTH LAYOUT (SPLIT SCREEN + SHOWCASE)
@@ -3615,11 +3310,9 @@ button {
   margin: auto;
 }
 
-
 .auth-layout .auth-box {
   flex-shrink: 0;
 }
-
 
 .auth-showcase {
   flex: 1;
@@ -3629,11 +3322,9 @@ button {
   max-width: 640px;
 }
 
-
 .auth-showcase .section-tag {
   color: rgba(33, 20, 15, 0.45);
 }
-
 
 .auth-showcase h3 {
   margin-top: 18px;
@@ -3647,7 +3338,6 @@ button {
   letter-spacing: -0.02em;
 }
 
-
 .auth-showcase > p {
   max-width: 440px;
 
@@ -3660,11 +3350,9 @@ button {
   line-height: 1.7;
 }
 
-
 .auth-showcase .dashboard-container {
   margin: 40px 0 0;
 }
-
 
 /* =========================================================
    DEMO ACCOUNT HINT
@@ -3688,7 +3376,6 @@ button {
   background: rgba(255, 116, 23, 0.06);
 }
 
-
 .auth-demo strong {
   display: block;
 
@@ -3696,7 +3383,6 @@ button {
 
   color: var(--text);
 }
-
 
 .auth-demo span {
   display: block;
@@ -3707,7 +3393,6 @@ button {
 
   font-size: 11.5px;
 }
-
 
 .auth-demo button {
   flex-shrink: 0;
@@ -3730,13 +3415,11 @@ button {
   transition: 0.2s ease;
 }
 
-
 .auth-demo button:hover {
   transform: translateY(-1px);
 
   box-shadow: 0 8px 18px rgba(255, 116, 23, 0.25);
 }
-
 
 /* =========================================================
    AUTH SUCCESS POPUP
@@ -3760,7 +3443,6 @@ button {
   backdrop-filter: blur(6px);
 }
 
-
 .auth-success-card {
   width: min(360px, 100%);
 
@@ -3774,7 +3456,6 @@ button {
 
   box-shadow: 0 30px 80px rgba(33, 20, 15, 0.3);
 }
-
 
 .auth-success-icon {
   width: 56px;
@@ -3799,13 +3480,11 @@ button {
   box-shadow: 0 10px 30px rgba(255, 116, 23, 0.35);
 }
 
-
 .auth-success-card h3 {
   font-family: "Space Grotesk", sans-serif;
 
   font-size: 19px;
 }
-
 
 .auth-success-card p {
   margin-top: 8px;
@@ -3816,7 +3495,6 @@ button {
 
   line-height: 1.6;
 }
-
 
 .auth-success-bar {
   height: 4px;
@@ -3830,7 +3508,6 @@ button {
   overflow: hidden;
 }
 
-
 .auth-success-bar-fill {
   height: 100%;
 
@@ -3843,7 +3520,6 @@ button {
   );
 }
 
-
 @media (max-width: 1100px) {
 
   .auth-showcase {
@@ -3851,7 +3527,6 @@ button {
   }
 
 }
-
 
 @media (max-width: 500px) {
 
@@ -3861,13 +3536,11 @@ button {
     align-items: flex-start;
   }
 
-
   .auth-demo button {
     width: 100%;
   }
 
 }
-
 
 /* =========================================================
    LIVE READING PAGE (INTERNAL, POST-LOGIN)
@@ -3880,7 +3553,6 @@ button {
 
   background: var(--cream);
 }
-
 
 .live-topbar {
   display: flex;
@@ -3902,14 +3574,12 @@ button {
   backdrop-filter: blur(20px);
 }
 
-
 .live-topbar-actions {
   display: flex;
   align-items: center;
 
   gap: 12px;
 }
-
 
 .live-user {
   display: flex;
@@ -3929,7 +3599,6 @@ button {
   font-weight: 600;
 }
 
-
 .live-header {
   display: flex;
   align-items: flex-end;
@@ -3944,7 +3613,6 @@ button {
   margin: 0 auto 28px;
 }
 
-
 .live-header h1 {
   margin: 8px 0 0;
 
@@ -3955,7 +3623,6 @@ button {
   letter-spacing: -0.03em;
 }
 
-
 .live-header p {
   margin-top: 8px;
 
@@ -3963,7 +3630,6 @@ button {
 
   font-size: 14px;
 }
-
 
 .live-grid {
   display: grid;
@@ -3977,7 +3643,6 @@ button {
   margin: 0 auto 20px;
 }
 
-
 .live-stat-card {
   padding: 22px;
 
@@ -3990,7 +3655,6 @@ button {
   box-shadow: 0 15px 40px rgba(60, 35, 20, 0.05);
 }
 
-
 .live-stat-label {
   margin-top: 14px;
 
@@ -4000,7 +3664,6 @@ button {
 
   font-weight: 600;
 }
-
 
 .live-stat-value {
   margin-top: 4px;
@@ -4014,7 +3677,6 @@ button {
   letter-spacing: -0.02em;
 }
 
-
 .live-stat-value span {
   margin-left: 4px;
 
@@ -4024,7 +3686,6 @@ button {
 
   font-weight: 500;
 }
-
 
 .live-lower {
   display: grid;
@@ -4037,7 +3698,6 @@ button {
 
   margin: 0 auto;
 }
-
 
 .live-feed,
 .live-status-panel {
@@ -4052,7 +3712,6 @@ button {
   box-shadow: 0 15px 40px rgba(60, 35, 20, 0.05);
 }
 
-
 .live-feed-list {
   display: flex;
 
@@ -4062,7 +3721,6 @@ button {
 
   margin-top: 16px;
 }
-
 
 .live-feed-item {
   display: flex;
@@ -4077,11 +3735,9 @@ button {
   font-size: 13px;
 }
 
-
 .live-feed-item:last-child {
   border-bottom: none;
 }
-
 
 .live-feed-dot {
   width: 7px;
@@ -4094,7 +3750,6 @@ button {
   flex-shrink: 0;
 }
 
-
 .live-feed-time {
   margin-left: auto;
 
@@ -4102,7 +3757,6 @@ button {
 
   font-size: 11.5px;
 }
-
 
 .live-status-list {
   display: flex;
@@ -4114,18 +3768,15 @@ button {
   margin-top: 16px;
 }
 
-
 @media (max-width: 900px) {
 
   .live-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-
   .live-lower {
     grid-template-columns: 1fr;
   }
-
 
   .live-topbar-actions .secondary-button {
     display: none;
@@ -4133,13 +3784,11 @@ button {
 
 }
 
-
 @media (max-width: 650px) {
 
   .live-topbar {
     border-radius: 20px;
   }
-
 
   .live-user span:not(.nav-user-avatar) {
     display: none;
@@ -4158,9 +3807,6 @@ button {
 
   background: var(--cream);
 }
-
-
-/* ---- Sidebar ---- */
 
 .live-sidebar {
   position: sticky;
@@ -4186,13 +3832,11 @@ button {
   overflow-y: auto;
 }
 
-
 .live-sidebar .side-logo {
   padding: 6px 8px 26px;
 
   font-size: 15px;
 }
-
 
 .live-sidebar .mini-logo {
   width: 34px;
@@ -4201,19 +3845,16 @@ button {
   border-radius: 10px;
 }
 
-
 .live-sidebar .mini-logo svg {
   width: 16px;
   height: 16px;
 }
-
 
 .live-sidebar .sidebar-title {
   margin: 18px 10px 8px;
 
   font-size: 10px;
 }
-
 
 .live-sidebar button.side-link {
   width: 100%;
@@ -4228,7 +3869,6 @@ button {
 
   font-family: inherit;
 }
-
 
 .live-sidebar .side-link {
   padding: 11px 12px;
@@ -4246,13 +3886,11 @@ button {
   transition: 0.2s ease;
 }
 
-
 .live-sidebar .side-link:hover {
   background: rgba(33, 20, 15, 0.04);
 
   color: var(--text);
 }
-
 
 .live-sidebar .side-link.active {
   color: white;
@@ -4262,11 +3900,9 @@ button {
   box-shadow: 0 8px 18px rgba(33, 20, 15, 0.18);
 }
 
-
 .live-sidebar .side-link svg {
   flex-shrink: 0;
 }
-
 
 .sidebar-footer-card {
   display: flex;
@@ -4285,7 +3921,6 @@ button {
   border: 1px solid rgba(255, 116, 23, 0.15);
 }
 
-
 .sidebar-footer-icon {
   width: 34px;
   height: 34px;
@@ -4303,7 +3938,6 @@ button {
   background: var(--orange);
 }
 
-
 .sidebar-footer-card div span {
   display: block;
 
@@ -4311,7 +3945,6 @@ button {
 
   font-size: 10.5px;
 }
-
 
 .sidebar-footer-card div strong {
   display: block;
@@ -4321,9 +3954,6 @@ button {
   font-size: 12.5px;
 }
 
-
-/* ---- Main area / top bar ---- */
-
 .live-main-area {
   flex: 1;
 
@@ -4331,7 +3961,6 @@ button {
 
   padding: 22px 28px 60px;
 }
-
 
 .live-topbar {
   display: flex;
@@ -4341,7 +3970,6 @@ button {
 
   margin-bottom: 16px;
 }
-
 
 .live-menu-toggle {
   display: none;
@@ -4365,13 +3993,11 @@ button {
   cursor: pointer;
 }
 
-
 .live-topbar .dashboard-url {
   padding: 9px 20px;
 
   font-size: 11.5px;
 }
-
 
 .live-topbar-right {
   display: flex;
@@ -4382,21 +4008,17 @@ button {
   margin-left: auto;
 }
 
-
 .dashboard-status.live-status-connected {
   color: #16a34a;
 }
-
 
 .dashboard-status.live-status-connected span {
   background: #16a34a;
 }
 
-
 .dashboard-status.live-status-error {
   color: #dc2626;
 }
-
 
 .dashboard-status.live-status-error span {
   background: #dc2626;
@@ -4404,18 +4026,15 @@ button {
   box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
 }
 
-
 .dashboard-status.live-status-disconnected {
   color: var(--muted);
 }
-
 
 .dashboard-status.live-status-disconnected span {
   background: #a49b95;
 
   box-shadow: 0 0 0 4px rgba(164, 155, 149, 0.12);
 }
-
 
 .live-topbar .dashboard-status {
   padding: 9px 14px;
@@ -4428,7 +4047,6 @@ button {
 
   font-size: 11px;
 }
-
 
 .live-user {
   display: flex;
@@ -4448,9 +4066,6 @@ button {
   font-weight: 600;
 }
 
-
-/* ---- ESP32 connect panel ---- */
-
 .esp32-panel {
   display: flex;
   align-items: center;
@@ -4469,13 +4084,11 @@ button {
   background: rgba(255, 116, 23, 0.05);
 }
 
-
 .esp32-panel-text {
   flex: 1;
 
   min-width: 220px;
 }
-
 
 .esp32-panel-text strong {
   display: flex;
@@ -4487,7 +4100,6 @@ button {
 
   color: var(--text);
 }
-
 
 .esp32-panel-text span {
   display: block;
@@ -4501,13 +4113,11 @@ button {
   line-height: 1.6;
 }
 
-
 .esp32-panel-controls {
   display: flex;
 
   gap: 8px;
 }
-
 
 .esp32-panel-controls input {
   padding: 10px 14px;
@@ -4525,13 +4135,11 @@ button {
   width: 160px;
 }
 
-
 .esp32-panel-controls input:focus {
   outline: none;
 
   border-color: var(--orange);
 }
-
 
 .primary-button.small,
 .secondary-button.small {
@@ -4542,19 +4150,14 @@ button {
   font-size: 12.5px;
 }
 
-
-/* ---- Page content shell ---- */
-
 .live-page-content .small-label,
 .live-page-content .card-label {
   font-size: 10.5px;
 }
 
-
 .page-block {
   animation: pageFadeIn 0.3s ease;
 }
-
 
 @keyframes pageFadeIn {
 
@@ -4572,7 +4175,6 @@ button {
 
 }
 
-
 .page-heading {
   display: flex;
   align-items: center;
@@ -4585,7 +4187,6 @@ button {
   margin-bottom: 22px;
 }
 
-
 .page-heading h1 {
   margin: 6px 0 4px;
 
@@ -4596,7 +4197,6 @@ button {
   letter-spacing: -0.03em;
 }
 
-
 .page-heading p {
   margin: 0;
 
@@ -4605,15 +4205,11 @@ button {
   font-size: 13.5px;
 }
 
-
 .live-page-content .dashboard-live {
   padding: 10px 16px;
 
   font-size: 11px;
 }
-
-
-/* ---- Gauge (Overview) ---- */
 
 .gauge-row {
   display: grid;
@@ -4624,7 +4220,6 @@ button {
 
   margin-bottom: 18px;
 }
-
 
 .gauge-card {
   padding: 26px;
@@ -4639,7 +4234,6 @@ button {
 
   box-shadow: 0 25px 60px rgba(33, 20, 15, 0.2);
 }
-
 
 .iaq-gauge {
   width: 170px;
@@ -4656,7 +4250,6 @@ button {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
-
 .iaq-gauge-inner {
   width: 138px;
   height: 138px;
@@ -4671,7 +4264,6 @@ button {
   background: #1a100b;
 }
 
-
 .iaq-number {
   font-family: "Space Grotesk", sans-serif;
 
@@ -4681,7 +4273,6 @@ button {
 
   letter-spacing: -0.03em;
 }
-
 
 .iaq-gauge-inner span {
   margin-top: 2px;
@@ -4695,11 +4286,9 @@ button {
   letter-spacing: 0.12em;
 }
 
-
 .gauge-text {
   margin-top: 18px;
 }
-
 
 .gauge-text h3 {
   margin: 0;
@@ -4708,7 +4297,6 @@ button {
 
   font-size: 19px;
 }
-
 
 .gauge-text p {
   margin: 6px 0 0;
@@ -4719,7 +4307,6 @@ button {
 
   line-height: 1.6;
 }
-
 
 .iaq-badge {
   display: inline-flex;
@@ -4739,9 +4326,6 @@ button {
   font-weight: 700;
 }
 
-
-/* ---- Tile grid (stat cards) ---- */
-
 .tile-grid {
   display: grid;
 
@@ -4750,11 +4334,9 @@ button {
   gap: 12px;
 }
 
-
 .tile-grid.three {
   grid-template-columns: repeat(3, 1fr);
 }
-
 
 .stat-tile {
   position: relative;
@@ -4770,7 +4352,6 @@ button {
   box-shadow: 0 12px 30px rgba(60, 35, 20, 0.05);
 }
 
-
 .tile-value {
   margin-top: 12px;
 
@@ -4783,7 +4364,6 @@ button {
   letter-spacing: -0.02em;
 }
 
-
 .tile-value span {
   margin-left: 4px;
 
@@ -4794,7 +4374,6 @@ button {
   font-weight: 500;
 }
 
-
 .tile-label {
   margin-top: 3px;
 
@@ -4804,7 +4383,6 @@ button {
 
   font-weight: 600;
 }
-
 
 .tile-badge {
   display: inline-block;
@@ -4820,13 +4398,11 @@ button {
   font-weight: 700;
 }
 
-
 .tile-badge.good {
   color: #166534;
 
   background: #dcfce7;
 }
-
 
 .tile-badge.moderate {
   color: #854d0e;
@@ -4834,15 +4410,11 @@ button {
   background: #fef3c7;
 }
 
-
 .tile-badge.danger {
   color: #991b1b;
 
   background: #fee2e2;
 }
-
-
-/* ---- Device status row ---- */
 
 .device-status-row {
   display: grid;
@@ -4854,7 +4426,6 @@ button {
   margin: 18px 0;
 }
 
-
 .device-status-row > div {
   padding: 14px 16px;
 
@@ -4865,7 +4436,6 @@ button {
   background: white;
 }
 
-
 .device-status-row span {
   display: block;
 
@@ -4873,7 +4443,6 @@ button {
 
   font-size: 11px;
 }
-
 
 .device-status-row strong {
   display: block;
@@ -4883,15 +4452,11 @@ button {
   font-size: 14px;
 }
 
-
-/* ---- Air quality chart ---- */
-
 .range-buttons {
   display: flex;
 
   gap: 6px;
 }
-
 
 .range-btn {
   padding: 8px 14px;
@@ -4912,7 +4477,6 @@ button {
   transition: 0.2s ease;
 }
 
-
 .range-btn.active {
   border-color: var(--orange);
 
@@ -4920,7 +4484,6 @@ button {
 
   background: var(--orange);
 }
-
 
 .chart-card {
   position: relative;
@@ -4938,7 +4501,6 @@ button {
   box-shadow: 0 12px 30px rgba(60, 35, 20, 0.05);
 }
 
-
 .chart-legend {
   display: flex;
 
@@ -4946,7 +4508,6 @@ button {
 
   margin-bottom: 10px;
 }
-
 
 .chart-legend span {
   display: flex;
@@ -4959,14 +4520,12 @@ button {
   font-size: 12px;
 }
 
-
 .chart-legend i {
   width: 8px;
   height: 8px;
 
   border-radius: 50%;
 }
-
 
 .pm-chart-svg {
   width: 100%;
@@ -4975,7 +4534,6 @@ button {
 
   cursor: crosshair;
 }
-
 
 .chart-tooltip-box {
   position: absolute;
@@ -4998,7 +4556,6 @@ button {
   box-shadow: 0 15px 30px rgba(33, 20, 15, 0.25);
 }
 
-
 .chart-tooltip-box strong {
   display: block;
 
@@ -5009,9 +4566,6 @@ button {
   color: rgba(255, 255, 255, 0.6);
 }
 
-
-/* ---- Environment page ---- */
-
 .wide-card-row {
   display: grid;
 
@@ -5019,7 +4573,6 @@ button {
 
   gap: 14px;
 }
-
 
 .wide-card {
   padding: 20px;
@@ -5033,7 +4586,6 @@ button {
   color: var(--orange);
 }
 
-
 .wide-card h3 {
   margin: 14px 0 2px;
 
@@ -5043,7 +4595,6 @@ button {
 
   color: var(--text);
 }
-
 
 .wide-card .unit {
   margin-left: 3px;
@@ -5055,14 +4606,12 @@ button {
   font-weight: 500;
 }
 
-
 .wide-card > span {
   color: var(--muted);
 
   font-size: 12.5px;
   font-weight: 600;
 }
-
 
 .comfort-card {
   display: flex;
@@ -5080,7 +4629,6 @@ button {
 
   background: white;
 }
-
 
 .comfort-score {
   width: 90px;
@@ -5100,20 +4648,17 @@ button {
   box-shadow: 0 15px 35px rgba(255, 116, 23, 0.3);
 }
 
-
 .comfort-score strong {
   font-family: "Space Grotesk", sans-serif;
 
   font-size: 20px;
 }
 
-
 .comfort-card h4 {
   margin: 0;
 
   font-size: 17px;
 }
-
 
 .comfort-card > div > p {
   margin: 4px 0 0;
@@ -5122,7 +4667,6 @@ button {
 
   font-size: 12.5px;
 }
-
 
 .comfort-mini-grid {
   display: grid;
@@ -5134,7 +4678,6 @@ button {
   margin-top: 16px;
 }
 
-
 .mini {
   padding: 10px 12px;
 
@@ -5142,7 +4685,6 @@ button {
 
   background: var(--cream);
 }
-
 
 .mini span {
   display: block;
@@ -5155,7 +4697,6 @@ button {
   letter-spacing: 0.06em;
 }
 
-
 .mini strong {
   display: block;
 
@@ -5163,9 +4704,6 @@ button {
 
   font-size: 13px;
 }
-
-
-/* ---- Camera page ---- */
 
 .camera-card {
   position: relative;
@@ -5185,7 +4723,6 @@ button {
   box-shadow: 0 25px 60px rgba(33, 20, 15, 0.2);
 }
 
-
 .camera-stream {
   width: 100%;
   height: 100%;
@@ -5194,7 +4731,6 @@ button {
 
   object-fit: cover;
 }
-
 
 .camera-placeholder {
   display: flex;
@@ -5208,7 +4744,6 @@ button {
   text-align: center;
 }
 
-
 .camera-placeholder h4 {
   margin: 4px 0 0;
 
@@ -5216,7 +4751,6 @@ button {
 
   font-size: 15px;
 }
-
 
 .camera-placeholder p {
   max-width: 260px;
@@ -5227,7 +4761,6 @@ button {
 
   line-height: 1.6;
 }
-
 
 .camera-overlay-top {
   position: absolute;
@@ -5254,7 +4787,6 @@ button {
   letter-spacing: 0.06em;
 }
 
-
 .rec-dot {
   width: 6px;
   height: 6px;
@@ -5268,7 +4800,6 @@ button {
   animation: recBlink 1.4s ease-in-out infinite;
 }
 
-
 @keyframes recBlink {
 
   0%, 100% {
@@ -5281,27 +4812,19 @@ button {
 
 }
 
-
 .live-page-content .tile-grid.three {
   margin-top: 16px;
 }
 
-
 .live-page-content .secondary-button {
   margin-top: 16px;
 }
-
-
-/* ---- Location / GPS page ---- */
 
 .map-placeholder.large {
   min-height: 280px;
 
   margin-bottom: 18px;
 }
-
-
-/* ---- Data log page ---- */
 
 .logger-warning {
   margin-bottom: 14px;
@@ -5321,7 +4844,6 @@ button {
   font-weight: 600;
 }
 
-
 .logger-controls {
   display: flex;
   align-items: flex-end;
@@ -5339,7 +4861,6 @@ button {
 
   background: white;
 }
-
 
 .logger-status {
   display: flex;
@@ -5359,13 +4880,11 @@ button {
   font-weight: 700;
 }
 
-
 .logger-status.running {
   color: #166534;
 
   background: #dcfce7;
 }
-
 
 .logger-dot {
   width: 7px;
@@ -5376,11 +4895,9 @@ button {
   background: currentColor;
 }
 
-
 .logger-status.running .logger-dot {
   animation: recBlink 1.2s ease-in-out infinite;
 }
-
 
 .logger-field {
   display: flex;
@@ -5393,7 +4910,6 @@ button {
 
   color: var(--muted);
 }
-
 
 .logger-field select,
 .logger-field input {
@@ -5412,20 +4928,17 @@ button {
   color: var(--text);
 }
 
-
 .logger-buttons {
   display: flex;
 
   gap: 8px;
 }
 
-
 .logger-record-count {
   margin-left: auto;
 
   text-align: right;
 }
-
 
 .logger-record-count span {
   display: block;
@@ -5434,7 +4947,6 @@ button {
 
   font-size: 11px;
 }
-
 
 .logger-record-count strong {
   display: block;
@@ -5446,7 +4958,6 @@ button {
   font-size: 20px;
 }
 
-
 .export-row {
   display: flex;
   align-items: flex-end;
@@ -5455,7 +4966,6 @@ button {
 
   margin-bottom: 16px;
 }
-
 
 .log-table-wrap {
   overflow-x: auto;
@@ -5467,7 +4977,6 @@ button {
   background: white;
 }
 
-
 .log-table {
   width: 100%;
 
@@ -5477,7 +4986,6 @@ button {
 
   font-size: 12.5px;
 }
-
 
 .log-table th {
   padding: 12px 14px;
@@ -5498,7 +5006,6 @@ button {
   border-bottom: 1px solid var(--border);
 }
 
-
 .log-table td {
   padding: 11px 14px;
 
@@ -5507,11 +5014,9 @@ button {
   color: var(--text);
 }
 
-
 .log-table tr:last-child td {
   border-bottom: none;
 }
-
 
 .log-empty {
   padding: 30px 14px !important;
@@ -5521,9 +5026,6 @@ button {
   color: var(--muted);
 }
 
-
-/* ---- Alerts page ---- */
-
 .alerts-list {
   display: flex;
   flex-direction: column;
@@ -5532,7 +5034,6 @@ button {
 
   margin: 18px 0;
 }
-
 
 .alert-row {
   display: grid;
@@ -5551,7 +5052,6 @@ button {
   background: white;
 }
 
-
 .alert-row .alert-icon {
   width: 36px;
   height: 36px;
@@ -5567,13 +5067,11 @@ button {
   font-size: 16px;
 }
 
-
 .alert-row strong {
   display: block;
 
   font-size: 13.5px;
 }
-
 
 .alert-row span {
   display: block;
@@ -5587,7 +5085,6 @@ button {
   line-height: 1.5;
 }
 
-
 .alert-level {
   padding: 6px 12px;
 
@@ -5599,13 +5096,11 @@ button {
   white-space: nowrap;
 }
 
-
 .alert-level.level-danger {
   color: #991b1b;
 
   background: #fee2e2;
 }
-
 
 .alert-level.level-warning {
   color: #854d0e;
@@ -5613,20 +5108,17 @@ button {
   background: #fef3c7;
 }
 
-
 .alert-level.level-good {
   color: #166534;
 
   background: #dcfce7;
 }
 
-
 .alert-level.level-info {
   color: #1d4ed8;
 
   background: #dbeafe;
 }
-
 
 .threshold-card {
   padding: 20px;
@@ -5638,13 +5130,11 @@ button {
   background: white;
 }
 
-
 .threshold-card h4 {
   margin: 0 0 16px;
 
   font-size: 16px;
 }
-
 
 .threshold-grid {
   display: grid;
@@ -5653,7 +5143,6 @@ button {
 
   gap: 14px;
 }
-
 
 .threshold-field {
   display: flex;
@@ -5666,7 +5155,6 @@ button {
 
   color: var(--muted);
 }
-
 
 .threshold-field input {
   padding: 9px 12px;
@@ -5684,7 +5172,6 @@ button {
   color: var(--text);
 }
 
-
 .threshold-actions {
   display: flex;
 
@@ -5693,16 +5180,12 @@ button {
   margin-top: 18px;
 }
 
-
-/* ---- Safety page ---- */
-
 .safety-toggle-list {
   display: flex;
   flex-direction: column;
 
   gap: 10px;
 }
-
 
 .safety-toggle-row {
   display: grid;
@@ -5721,13 +5204,11 @@ button {
   background: white;
 }
 
-
 .safety-toggle-row strong {
   display: block;
 
   font-size: 13.5px;
 }
-
 
 .safety-toggle-row span {
   display: block;
@@ -5738,7 +5219,6 @@ button {
 
   font-size: 12px;
 }
-
 
 .toggle-switch {
   position: relative;
@@ -5759,7 +5239,6 @@ button {
   transition: 0.25s ease;
 }
 
-
 .toggle-switch span {
   position: absolute;
 
@@ -5778,18 +5257,13 @@ button {
   transition: 0.25s ease;
 }
 
-
 .toggle-switch.on {
   background: var(--orange);
 }
 
-
 .toggle-switch.on span {
   transform: translateX(18px);
 }
-
-
-/* ---- Responsive ---- */
 
 @media (max-width: 1000px) {
 
@@ -5809,31 +5283,25 @@ button {
     transition: left 0.3s ease;
   }
 
-
   .live-sidebar.open {
     left: 0;
   }
-
 
   .live-menu-toggle {
     display: flex;
   }
 
-
   .live-main-area {
     padding: 18px 16px 50px;
   }
-
 
   .gauge-row {
     grid-template-columns: 1fr;
   }
 
-
   .tile-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-
 
   .wide-card-row,
   .device-status-row,
@@ -5843,7 +5311,6 @@ button {
   }
 
 }
-
 
 @media (max-width: 600px) {
 
@@ -5855,32 +5322,25 @@ button {
     grid-template-columns: 1fr;
   }
 
-
   .comfort-card {
     flex-direction: column;
 
     text-align: center;
   }
 
-
   .live-topbar .dashboard-url {
     display: none;
   }
 
-
   .esp32-panel-controls input {
     width: 100%;
   }
-
 
   .esp32-panel-controls {
     width: 100%;
   }
 
 }
-
-
-/* ---- Full-scale overrides for reused mockup components ---- */
 
 .live-page-content .event-row {
   grid-template-columns: repeat(3, 1fr);
@@ -5890,7 +5350,6 @@ button {
   margin-top: 4px;
 }
 
-
 .live-page-content .event-item {
   gap: 12px;
 
@@ -5899,7 +5358,6 @@ button {
   border-radius: 14px;
 }
 
-
 .live-page-content .event-icon {
   width: 34px;
   height: 34px;
@@ -5907,22 +5365,18 @@ button {
   border-radius: 10px;
 }
 
-
 .live-page-content .event-icon svg,
 .live-page-content .event-icon span {
   font-size: 15px;
 }
 
-
 .live-page-content .event-item strong {
   font-size: 12.5px;
 }
 
-
 .live-page-content .event-item span {
   font-size: 11px;
 }
-
 
 .live-page-content .map-placeholder {
   height: 100%;
@@ -5932,14 +5386,12 @@ button {
   border-radius: 20px;
 }
 
-
 .live-page-content .map-pin {
   width: 46px;
   height: 46px;
 
   border-width: 6px;
 }
-
 
 @media (max-width: 700px) {
 
@@ -5948,7 +5400,6 @@ button {
   }
 
 }
-
 
 /* =========================================================
    PDF VIEWER MODAL
@@ -5972,7 +5423,6 @@ button {
   backdrop-filter: blur(8px);
 }
 
-
 .pdf-panel {
   width: min(920px, 100%);
 
@@ -5990,7 +5440,6 @@ button {
   box-shadow: 0 40px 100px rgba(20, 12, 8, 0.4);
 }
 
-
 .pdf-panel-bar {
   display: flex;
   align-items: center;
@@ -6005,7 +5454,6 @@ button {
   background: var(--cream);
 }
 
-
 .pdf-panel-title {
   display: flex;
   align-items: center;
@@ -6017,7 +5465,6 @@ button {
   font-size: 13.5px;
   font-weight: 700;
 }
-
 
 .pdf-close-button {
   width: 34px;
@@ -6040,14 +5487,12 @@ button {
   transition: 0.2s ease;
 }
 
-
 .pdf-panel-actions {
   display: flex;
   align-items: center;
 
   gap: 8px;
 }
-
 
 .pdf-panel.is-fullscreen {
   width: 100vw;
@@ -6056,20 +5501,17 @@ button {
   border-radius: 0;
 }
 
-
 .pdf-close-button:hover {
   border-color: var(--orange);
 
   color: var(--orange);
 }
 
-
 .pdf-panel-body {
   flex: 1;
 
   min-height: 0;
 }
-
 
 .pdf-panel-body iframe {
   width: 100%;
@@ -6078,13 +5520,11 @@ button {
   border: none;
 }
 
-
 @media (max-width: 700px) {
 
   .pdf-overlay {
     padding: 0;
   }
-
 
   .pdf-panel {
     height: 100vh;
@@ -6110,8 +5550,6 @@ video,
 svg {
   max-width: 100%;
 }
-
-/* ---------- TABLET ---------- */
 
 @media (max-width: 900px) {
 
@@ -6161,8 +5599,6 @@ svg {
     width: 100%;
     max-width: 520px;
   }
-
-  /* Live dashboard */
 
   .live-shell {
     width: 100%;
@@ -6215,12 +5651,7 @@ svg {
   }
 }
 
-
-/* ---------- MOBILE ---------- */
-
 @media (max-width: 600px) {
-
-  /* Global */
 
   body {
     width: 100%;
@@ -6232,8 +5663,6 @@ svg {
     width: 100%;
     overflow-x: hidden;
   }
-
-  /* ---------- NAVBAR ---------- */
 
   .navbar-wrapper {
     padding: 8px;
@@ -6274,8 +5703,6 @@ svg {
     border-radius: 16px;
   }
 
-  /* ---------- HERO ---------- */
-
   .hero {
     min-height: auto;
     padding: 105px 14px 55px;
@@ -6314,8 +5741,6 @@ svg {
     text-align: center;
   }
 
-  /* ---------- LANDING DASHBOARD PREVIEW ---------- */
-
   .dashboard-container {
     width: 100%;
     margin-top: 45px;
@@ -6348,8 +5773,6 @@ svg {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  /* ---------- SECTIONS ---------- */
-
   .about-grid,
   .ai-layout {
     grid-template-columns: 1fr;
@@ -6370,8 +5793,6 @@ svg {
     padding-left: 16px;
     padding-right: 16px;
   }
-
-  /* ---------- AUTH ---------- */
 
   .auth-section {
     width: 100%;
@@ -6427,8 +5848,6 @@ svg {
     font-size: 12px;
   }
 
-  /* ---------- LIVE DASHBOARD ---------- */
-
   .live-shell {
     width: 100%;
     min-height: 100svh;
@@ -6459,8 +5878,6 @@ svg {
     flex-shrink: 0;
   }
 
-  /* Dashboard cards */
-
   .live-grid,
   .tile-grid,
   .wide-card-row,
@@ -6480,8 +5897,6 @@ svg {
     max-width: 100%;
   }
 
-  /* ---------- ESP32 CONNECTION ---------- */
-
   .esp32-panel {
     width: 100%;
     padding: 14px;
@@ -6500,8 +5915,6 @@ svg {
     max-width: 100%;
   }
 
-  /* ---------- TABLE / DATA LOG ---------- */
-
   .table-wrapper,
   .data-table-wrapper,
   .table-scroll {
@@ -6514,8 +5927,6 @@ svg {
   table {
     min-width: 650px;
   }
-
-  /* ---------- CAMERA ---------- */
 
   .camera-container,
   .camera-card,
@@ -6531,16 +5942,12 @@ svg {
     object-fit: contain;
   }
 
-  /* ---------- GPS / MAP ---------- */
-
   .map-placeholder,
   #liveMap {
     width: 100%;
     max-width: 100%;
     min-height: 300px;
   }
-
-  /* ---------- CHARTS ---------- */
 
   .chart-container,
   .chart-card {
@@ -6553,8 +5960,6 @@ svg {
     max-width: 100%;
   }
 
-  /* ---------- ALERTS ---------- */
-
   .event-row {
     grid-template-columns: 1fr !important;
   }
@@ -6562,8 +5967,6 @@ svg {
   .event-item {
     width: 100%;
   }
-
-  /* ---------- PDF ---------- */
 
   .pdf-overlay {
     padding: 8px;
@@ -6575,9 +5978,6 @@ svg {
     border-radius: 14px;
   }
 }
-
-
-/* ---------- VERY SMALL PHONES ---------- */
 
 @media (max-width: 380px) {
 
@@ -6613,4 +6013,51 @@ svg {
     padding-left: 7px;
     padding-right: 7px;
   }
+}
+
+.forgot-password-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -8px;
+  margin-bottom: 8px;
+}
+
+.forgot-password-button {
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: #ff6b1a;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.forgot-password-button:hover {
+  opacity: 0.75;
+}
+
+.forgot-password-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.password-reset-success {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.password-reset-success-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.password-reset-success-text {
+  font-size: 13px;
+  line-height: 1.5;
+  opacity: 0.8;
 }

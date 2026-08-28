@@ -48,6 +48,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendEmailVerification,
+  sendPasswordResetEmail,
   onAuthStateChanged,
   signOut,
   updateProfile,
@@ -1704,8 +1705,44 @@ function AuthPage({ onAuthSuccess, onBack }) {
   const [showSuccess, setShowSuccess] = React.useState(false);
   const [pendingUser, setPendingUser] = React.useState(null);
   const [successMessage, setSuccessMessage] = React.useState("");
+  const [passwordResetSent, setPasswordResetSent] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
+  async function handleForgotPassword() {
+    setError("");
+    setPasswordResetSent(false);
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (!cleanEmail) {
+      setError("Please enter your email address first.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      await sendPasswordResetEmail(firebaseAuth, cleanEmail);
+
+      setPasswordResetSent(true);
+    } catch (err) {
+      console.error("Password reset error:", err);
+
+      if (err?.code === "auth/invalid-email") {
+        setError("Please enter a valid email address.");
+      } else if (err?.code === "auth/user-not-found") {
+        setError("No account was found with this email address.");
+      } else if (err?.code === "auth/too-many-requests") {
+        setError("Too many attempts. Please try again later.");
+      } else if (err?.code === "auth/network-request-failed") {
+        setError("Network error. Please check your internet connection.");
+      } else {
+        setError("Unable to send password reset email.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -1970,6 +2007,33 @@ function AuthPage({ onAuthSuccess, onBack }) {
               </div>
             </label>
 
+
+            {mode === "login" && (
+              <div className="forgot-password-row">
+                <button
+                  type="button"
+                  className="forgot-password-button"
+                  onClick={handleForgotPassword}
+                  disabled={isSubmitting}
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
+            {passwordResetSent && (
+              <div className="password-reset-success">
+                <div className="password-reset-success-title">
+                  Check your email
+                </div>
+
+                <div className="password-reset-success-text">
+                  We’ve sent a password reset link to your email address.
+                  Please check your inbox and spam folder.
+                </div>
+              </div>
+            )}
+
+            
             {error && <div className="auth-error">{error}</div>}
 
             <button
@@ -2589,10 +2653,10 @@ function LiveReadingPage({ currentUser, onLogout, onBackToSite }) {
     connectionStatus === "connected"
       ? "ESP32 LIVE"
       : connectionStatus === "connecting"
-      ? "CONNECTING..."
-      : connectionStatus === "error"
-      ? "ESP32 UNREACHABLE"
-      : "NOT CONNECTED";
+        ? "CONNECTING..."
+        : connectionStatus === "error"
+          ? "ESP32 UNREACHABLE"
+          : "NOT CONNECTED";
 
   return (
     <div className="live-shell">
@@ -2843,10 +2907,10 @@ function OverviewPage({ latest, alerts, connectionStatus }) {
     connectionStatus === "connected"
       ? "Connected"
       : connectionStatus === "connecting"
-      ? "Connecting..."
-      : connectionStatus === "error"
-      ? "ESP32 unreachable"
-      : "Not connected";
+        ? "Connecting..."
+        : connectionStatus === "error"
+          ? "ESP32 unreachable"
+          : "Not connected";
 
   return (
     <div className="page-block">
@@ -2959,10 +3023,10 @@ function OverviewPage({ latest, alerts, connectionStatus }) {
           <strong>
             {connectionStatus === "connected"
               ? new Date().toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                })
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              })
               : "--"}
           </strong>
         </div>
@@ -3117,19 +3181,19 @@ function EnvironmentPage({ latest }) {
 
   const comfort = hasData
     ? clamp(
-        100 - Math.abs(latest.temperature - 25) * 5 - Math.abs(latest.humidity - 50) * 0.6,
-        45,
-        96
-      )
+      100 - Math.abs(latest.temperature - 25) * 5 - Math.abs(latest.humidity - 50) * 0.6,
+      45,
+      96
+    )
     : null;
 
   const comfortLabel = !hasData
     ? "No data yet"
     : comfort > 75
-    ? "Very Comfortable"
-    : comfort > 60
-    ? "Comfortable"
-    : "Needs Improvement";
+      ? "Very Comfortable"
+      : comfort > 60
+        ? "Comfortable"
+        : "Needs Improvement";
 
   return (
     <div className="page-block">
@@ -3469,8 +3533,8 @@ function AlertsPage({ alerts, alertSettings, onSave, onReset }) {
   const highest = alerts.some((a) => a.level === "Danger")
     ? "Danger"
     : alerts.some((a) => a.level === "Warning")
-    ? "Warning"
-    : "Normal";
+      ? "Warning"
+      : "Normal";
 
   function field(key, label, step) {
     return (
