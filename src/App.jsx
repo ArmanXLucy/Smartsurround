@@ -48,13 +48,13 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendEmailVerification,
-  sendPasswordResetEmail,
   onAuthStateChanged,
   signOut,
   updateProfile,
   reload,
 } from "firebase/auth";
-import { firebaseApp } from "./firebaseClient";
+import { onValue, ref } from "firebase/database";
+import { firebaseApp, db } from "./firebaseClient";
 
 import "./index.css";
 
@@ -1705,67 +1705,7 @@ function AuthPage({ onAuthSuccess, onBack }) {
   const [pendingUser, setPendingUser] = React.useState(null);
   const [successMessage, setSuccessMessage] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [successType, setSuccessType] = React.useState(null);
-  // "login" | "signup" | "reset"
-  const [isResettingPassword, setIsResettingPassword] = React.useState(false);
 
-  async function handleForgotPassword() {
-    setError("");
-
-    const cleanEmail = email.trim().toLowerCase();
-
-    if (!cleanEmail) {
-      setError(
-        "Please enter your email address first, then click Forgot Password."
-      );
-      return;
-    }
-
-    setIsResettingPassword(true);
-
-    try {
-      // Forgot Password must never keep an existing login session active.
-      await signOut(firebaseAuth);
-
-      // Send the Firebase password reset email.
-      await sendPasswordResetEmail(firebaseAuth, cleanEmail);
-
-      // IMPORTANT: Password reset is NOT signup and is NOT login.
-      setSuccessType("reset");
-
-      setSuccessMessage(
-        "We have sent a password reset link to your email. Please check your Inbox or Spam folder, open the link, and create a new password. After resetting your password, return here and log in using your new password."
-      );
-
-      // Do not keep a user object that could be mistaken for a successful login.
-      setPendingUser(null);
-      setShowSuccess(true);
-    } catch (err) {
-      console.error("Firebase password reset error:", err);
-
-      const code = err?.code || "";
-
-      if (code === "auth/invalid-email") {
-        setError("Please enter a valid email address.");
-      } else if (code === "auth/user-not-found") {
-        setError("No account was found with this email address.");
-      } else if (code === "auth/too-many-requests") {
-        setError(
-          "Too many reset requests. Please wait a while and try again."
-        );
-      } else if (code === "auth/network-request-failed") {
-        setError(
-          "Network error. Please check your internet connection."
-        );
-      } else {
-        setError(
-          err?.message || "Unable to send the password reset email."
-        );
-      }
-    } finally {
-      setIsResettingPassword(false);
-    }
-  }
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -1850,8 +1790,6 @@ function AuthPage({ onAuthSuccess, onBack }) {
           email: user.email || cleanEmail,
         });
 
-        setSuccessType("login");
-
         setSuccessMessage(
           "Your email is verified. Taking you to your live dashboard..."
         );
@@ -1884,27 +1822,16 @@ function AuthPage({ onAuthSuccess, onBack }) {
   React.useEffect(() => {
     if (!showSuccess || !pendingUser) return;
 
-    // Signup must wait for email verification.
-    if (successType === "signup") return;
-
-    // Password reset is NOT a login.
-    // Never send the user to the dashboard.
-    if (successType === "reset") return;
-
-    // Only an actual successful login can enter the dashboard.
-    if (successType !== "login") return;
+    // Signup must NOT automatically enter the dashboard because
+    // the user still needs to verify their email first.
+    if (mode === "signup") return;
 
     const timer = setTimeout(() => {
       onAuthSuccess(pendingUser);
     }, 1700);
 
     return () => clearTimeout(timer);
-  }, [
-    showSuccess,
-    pendingUser,
-    successType,
-    onAuthSuccess,
-  ]);
+  }, [showSuccess, pendingUser, mode, onAuthSuccess]);
 
   function closeSuccess() {
     setShowSuccess(false);
@@ -2042,36 +1969,6 @@ function AuthPage({ onAuthSuccess, onBack }) {
                 </button>
               </div>
             </label>
-            {mode === "login" && (
-              <div
-                style={{
-                  textAlign: "right",
-                  marginTop: "-8px",
-                  marginBottom: "12px",
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  disabled={isResettingPassword}
-                  style={{
-                    border: "none",
-                    background: "transparent",
-                    padding: 0,
-                    cursor: isResettingPassword ? "default" : "pointer",
-                    font: "inherit",
-                    fontSize: "0.9rem",
-                    fontWeight: 600,
-                    color: "#ff6b1a",
-                    opacity: isResettingPassword ? 0.6 : 1,
-                  }}
-                >
-                  {isResettingPassword
-                    ? "Sending..."
-                    : "Forgot Password?"}
-                </button>
-              </div>
-            )}
 
             {error && <div className="auth-error">{error}</div>}
 
@@ -2167,11 +2064,7 @@ function AuthPage({ onAuthSuccess, onBack }) {
             </motion.div>
 
             <h3>
-              {successType === "reset"
-                ? "Password Reset Email Sent"
-                : successType === "login"
-                  ? "Login successful"
-                  : "Verify your email"}
+              {mode === "login" ? "Login successful" : "Verify your email"}
             </h3>
 
             <p>
@@ -2189,7 +2082,7 @@ function AuthPage({ onAuthSuccess, onBack }) {
               </button>
             )}
 
-            {successType === "login" && (
+            {mode === "login" && (
               <div className="auth-success-bar">
                 <motion.div
                   className="auth-success-bar-fill"
@@ -2198,25 +2091,6 @@ function AuthPage({ onAuthSuccess, onBack }) {
                   transition={{ duration: 1.6, ease: "linear" }}
                 />
               </div>
-            )}
-
-            {successType === "reset" && (
-              <button
-                type="button"
-                className="primary-button auth-submit"
-                onClick={() => {
-                  setShowSuccess(false);
-                  setPendingUser(null);
-                  setSuccessMessage("");
-                  setSuccessType(null);
-                  setPassword("");
-                  setError("");
-                  setMode("login");
-                }}
-              >
-                Back to Login
-                <ArrowRight size={16} />
-              </button>
             )}
 
           </motion.div>
@@ -2449,7 +2323,6 @@ function LiveReadingPage({ currentUser, onLogout, onBackToSite }) {
     const trimmed = esp32Input.trim();
 
     setEsp32Ip(trimmed);
-    setConnectionStatus(trimmed ? "connecting" : "disconnected");
 
     if (typeof window !== "undefined") {
       if (trimmed) {
@@ -2463,99 +2336,175 @@ function LiveReadingPage({ currentUser, onLogout, onBackToSite }) {
   function handleDisconnect() {
     setEsp32Ip("");
     setEsp32Input("");
-    setConnectionStatus("disconnected");
-    setLatest(EMPTY_READING);
-    setGps(EMPTY_GPS);
-    setCameraOnline(false);
-    setCamIp(null);
 
     if (typeof window !== "undefined") {
       window.localStorage.removeItem("esp32Ip");
     }
   }
 
-  // Poll sensor readings — from the ESP32's /api/readings endpoint when
-  // connected, otherwise keep the dashboard alive with simulated data.
-  // Expected JSON: { pm1, pm25, pm10, temperature, humidity, iaq, co2, voc,
-  //                  calibrating, iaqAccuracyText, ip, uptime, status }
+  // =========================================================
+  // FIREBASE REALTIME SENSOR DATA
+  // ESP32 → Firebase Realtime Database → React dashboard
+  //
+  // Supports either of these Firebase layouts:
+  //   /sensors/{...}
+  //   /{temperature, humidity, pm25, ...}
+  // GPS may be stored as /gps or /sensors/gps.
+  // =========================================================
   React.useEffect(() => {
+    const databaseRef = ref(db);
 
-    let cancelled = false;
+    const unsubscribe = onValue(
+      databaseRef,
+      (snapshot) => {
+        const root = snapshot.val();
 
-    async function poll() {
-
-      if (!esp32Ip) {
-        if (!cancelled) {
-          setConnectionStatus("disconnected");
+        if (!root || typeof root !== "object") {
           setLatest(EMPTY_READING);
+          setGps(EMPTY_GPS);
+          setCameraOnline(false);
+          setCamIp(null);
+          setConnectionStatus("disconnected");
+          return;
         }
-        return;
-      }
 
-      try {
-        const res = await fetch(`http://${esp32Ip}/api/readings`, { cache: "no-store" });
-        if (!res.ok) throw new Error("Bad response from ESP32");
+        // If your ESP32 stores readings under /sensors, use that.
+        // Otherwise use the database root directly.
+        const source =
+          root.sensors && typeof root.sensors === "object"
+            ? root.sensors
+            : root;
 
-        const data = await res.json();
-        if (cancelled) return;
+        const toNumberOrNull = (value) => {
+          if (value === null || value === undefined || value === "") return null;
+          const number = Number(value);
+          return Number.isFinite(number) ? number : null;
+        };
 
-        setLatest(data);
+        const nextReading = {
+          ...EMPTY_READING,
+
+          pm1: toNumberOrNull(source.pm1),
+          pm25: toNumberOrNull(source.pm25),
+          pm10: toNumberOrNull(source.pm10),
+
+          temperature: toNumberOrNull(source.temperature),
+          humidity: toNumberOrNull(source.humidity),
+
+          iaq: toNumberOrNull(source.iaq ?? source.iaqScore),
+          co2: toNumberOrNull(source.co2 ?? source.co2Equivalent),
+          voc: toNumberOrNull(source.voc ?? source.vocEquivalent),
+
+          calibrating:
+            source.calibrating !== undefined
+              ? Boolean(source.calibrating)
+              : false,
+
+          iaqAccuracyText:
+            source.iaqAccuracyText ?? source.iaqAccuracy ?? null,
+
+          ip: source.ip ?? root.ip ?? null,
+          uptime: toNumberOrNull(source.uptime),
+          status: source.status ?? null,
+        };
+
+        setLatest(nextReading);
+
+        // ---------------------------------------------------
+        // GPS
+        // ---------------------------------------------------
+        const gpsSource =
+          (source.gps && typeof source.gps === "object" && source.gps) ||
+          (root.gps && typeof root.gps === "object" && root.gps) ||
+          null;
+
+        if (gpsSource) {
+          setGps({
+            lat: toNumberOrNull(
+              gpsSource.latitude ?? gpsSource.lat
+            ),
+            lng: toNumberOrNull(
+              gpsSource.longitude ?? gpsSource.lng ?? gpsSource.lon
+            ),
+            alt: toNumberOrNull(
+              gpsSource.altitude ?? gpsSource.alt
+            ),
+            speed: toNumberOrNull(gpsSource.speed),
+            course: toNumberOrNull(gpsSource.course),
+            sats: toNumberOrNull(
+              gpsSource.satellites ?? gpsSource.sats
+            ),
+            hdop: toNumberOrNull(gpsSource.hdop),
+            fix: gpsSource.fix ?? null,
+            time: gpsSource.time ?? null,
+          });
+        } else {
+          // Also support flat GPS fields.
+          const hasFlatGps =
+            source.latitude !== undefined ||
+            source.longitude !== undefined ||
+            source.gpsValid !== undefined;
+
+          if (hasFlatGps) {
+            setGps({
+              lat: toNumberOrNull(source.latitude),
+              lng: toNumberOrNull(source.longitude),
+              alt: toNumberOrNull(source.altitude),
+              speed: toNumberOrNull(source.speed),
+              course: toNumberOrNull(source.course),
+              sats: toNumberOrNull(source.satellites),
+              hdop: toNumberOrNull(source.hdop),
+              fix:
+                source.gpsValid === true
+                  ? "Valid"
+                  : source.gpsValid === false
+                    ? "No Fix"
+                    : null,
+              time: source.gpsTime ?? null,
+            });
+          } else {
+            setGps(EMPTY_GPS);
+          }
+        }
+
+        // ---------------------------------------------------
+        // Camera status
+        // ---------------------------------------------------
+        const cameraSource =
+          source.camera && typeof source.camera === "object"
+            ? source.camera
+            : root.camera && typeof root.camera === "object"
+              ? root.camera
+              : null;
+
+        const firebaseCamIp =
+          source.camIp ??
+          source.cameraIp ??
+          cameraSource?.ip ??
+          cameraSource?.camIp ??
+          root.camIp ??
+          null;
+
+        const firebaseCameraOnline =
+          source.cameraOnline ??
+          cameraSource?.online ??
+          root.cameraOnline;
+
+        if (firebaseCamIp) setCamIp(String(firebaseCamIp));
+        if (firebaseCameraOnline !== undefined) {
+          setCameraOnline(Boolean(firebaseCameraOnline));
+        }
+
         setConnectionStatus("connected");
-
-        if (data.camIp) setCamIp(data.camIp);
-        setCameraOnline(!!data.cameraOnline);
-
-      } catch (err) {
-        // Keep the last known good reading on screen — never invent numbers.
-        if (!cancelled) setConnectionStatus("error");
+      },
+      (error) => {
+        console.error("Firebase Realtime Database error:", error);
+        setConnectionStatus("error");
       }
+    );
 
-    }
-
-    poll();
-    const interval = setInterval(poll, 2000);
-
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-
-  }, [esp32Ip]);
-
-  // Poll GPS (NEO-8M) — from /api/gps on the connected ESP32 only.
-  React.useEffect(() => {
-
-    let cancelled = false;
-
-    async function poll() {
-
-      if (!esp32Ip) {
-        if (!cancelled) setGps(EMPTY_GPS);
-        return;
-      }
-
-      try {
-        const res = await fetch(`http://${esp32Ip}/api/gps`, { cache: "no-store" });
-        if (!res.ok) throw new Error("Bad response from ESP32");
-
-        const data = await res.json();
-        if (!cancelled) setGps(data);
-
-      } catch (err) {
-        // Keep the last known GPS fix on screen instead of faking one.
-      }
-
-    }
-
-    poll();
-    const interval = setInterval(poll, 2000);
-
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-
-  }, [esp32Ip]);
+    return () => unsubscribe();
+  }, []);
 
   // Roll a PM history buffer for the Air Quality chart — only once real
   // readings start arriving.
@@ -2640,10 +2589,10 @@ function LiveReadingPage({ currentUser, onLogout, onBackToSite }) {
     connectionStatus === "connected"
       ? "ESP32 LIVE"
       : connectionStatus === "connecting"
-        ? "CONNECTING..."
-        : connectionStatus === "error"
-          ? "ESP32 UNREACHABLE"
-          : "NOT CONNECTED";
+      ? "CONNECTING..."
+      : connectionStatus === "error"
+      ? "ESP32 UNREACHABLE"
+      : "NOT CONNECTED";
 
   return (
     <div className="live-shell">
@@ -2753,13 +2702,15 @@ function LiveReadingPage({ currentUser, onLogout, onBackToSite }) {
           <div className="esp32-panel-text">
             <strong>
               <Radio size={14} />
-              Connect your main ESP32
+              Firebase sensor connection
             </strong>
 
             <span>
-              {esp32Ip
-                ? `Polling http://${esp32Ip}/api/readings and /api/gps. Camera stream is discovered automatically once your ESP32-CAM checks in.`
-                : "Enter the sensor ESP32's local IP to pull real PM/temperature/GPS data. The ESP32-CAM connects separately and reports its stream URL through this board — no random or demo values are shown."}
+              {connectionStatus === "connected"
+                ? "Live sensor and GPS readings are being received from Firebase Realtime Database. Use the local ESP32 IP below only for the camera stream on the same network."
+                : connectionStatus === "error"
+                  ? "Firebase connection error. Check your Firebase configuration, Realtime Database rules and network connection."
+                  : "Waiting for live sensor data from Firebase Realtime Database."}
             </span>
           </div>
 
@@ -2767,13 +2718,13 @@ function LiveReadingPage({ currentUser, onLogout, onBackToSite }) {
 
             <input
               type="text"
-              placeholder="192.168.1.42"
+              placeholder="ESP32 local IP (camera)"
               value={esp32Input}
               onChange={(e) => setEsp32Input(e.target.value)}
             />
 
             <button type="submit" className="primary-button small">
-              Connect
+              Save IP
             </button>
 
             {esp32Ip && (
@@ -2892,10 +2843,10 @@ function OverviewPage({ latest, alerts, connectionStatus }) {
     connectionStatus === "connected"
       ? "Connected"
       : connectionStatus === "connecting"
-        ? "Connecting..."
-        : connectionStatus === "error"
-          ? "ESP32 unreachable"
-          : "Not connected";
+      ? "Connecting..."
+      : connectionStatus === "error"
+      ? "ESP32 unreachable"
+      : "Not connected";
 
   return (
     <div className="page-block">
@@ -3008,10 +2959,10 @@ function OverviewPage({ latest, alerts, connectionStatus }) {
           <strong>
             {connectionStatus === "connected"
               ? new Date().toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-              })
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                })
               : "--"}
           </strong>
         </div>
@@ -3166,19 +3117,19 @@ function EnvironmentPage({ latest }) {
 
   const comfort = hasData
     ? clamp(
-      100 - Math.abs(latest.temperature - 25) * 5 - Math.abs(latest.humidity - 50) * 0.6,
-      45,
-      96
-    )
+        100 - Math.abs(latest.temperature - 25) * 5 - Math.abs(latest.humidity - 50) * 0.6,
+        45,
+        96
+      )
     : null;
 
   const comfortLabel = !hasData
     ? "No data yet"
     : comfort > 75
-      ? "Very Comfortable"
-      : comfort > 60
-        ? "Comfortable"
-        : "Needs Improvement";
+    ? "Very Comfortable"
+    : comfort > 60
+    ? "Comfortable"
+    : "Needs Improvement";
 
   return (
     <div className="page-block">
@@ -3518,8 +3469,8 @@ function AlertsPage({ alerts, alertSettings, onSave, onReset }) {
   const highest = alerts.some((a) => a.level === "Danger")
     ? "Danger"
     : alerts.some((a) => a.level === "Warning")
-      ? "Warning"
-      : "Normal";
+    ? "Warning"
+    : "Normal";
 
   function field(key, label, step) {
     return (

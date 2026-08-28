@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -8,12 +9,19 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
 };
 
-// Initialize Firebase
-export const firebaseApp = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
-// Initialize Authentication
-export const auth = getAuth(firebaseApp);
+// Firebase Authentication
+export const auth = getAuth(app);
 
-export default firebaseApp;
+// Firebase Realtime Database
+export const db = getDatabase(app);
+
+// Keep this name too, so your existing App.jsx
+// can use firebaseApp if needed.
+export const firebaseApp = app;
+
+export default app;
