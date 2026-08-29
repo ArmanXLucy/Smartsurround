@@ -6061,3 +6061,46 @@ svg {
   line-height: 1.5;
   opacity: 0.8;
 }
+
+/* =========================================================
+   MOBILE SIDEBAR FIX
+   ========================================================= */
+
+.live-sidebar-close {
+  display: none;
+}
+
+@media (max-width: 768px) {
+
+  .live-sidebar {
+    overflow: hidden !important;
+  }
+
+  .live-sidebar.open {
+    overflow: hidden !important;
+  }
+
+  .live-sidebar-close {
+    display: flex;
+    position: absolute;
+    top: 18px;
+    right: 18px;
+
+    width: 40px;
+    height: 40px;
+
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.06);
+
+    cursor: pointer;
+    z-index: 1000;
+  }
+
+  .live-sidebar-close:hover {
+    background: rgba(0, 0, 0, 0.12);
+  }
+}

@@ -2585,39 +2585,39 @@ function LiveReadingPage({ currentUser, onLogout, onBackToSite }) {
 
     return () => unsubscribe();
   }, []);
-// =========================================================
-// ESP32 CONNECTION TIMEOUT
-// If Firebase stops receiving ESP32 updates for 15 seconds,
-// consider the ESP32 disconnected and clear old readings.
-// =========================================================
-React.useEffect(() => {
-  const checkConnection = setInterval(() => {
-    const lastUpdate = lastFirebaseUpdate.current;
+  // =========================================================
+  // ESP32 CONNECTION TIMEOUT
+  // If Firebase stops receiving ESP32 updates for 15 seconds,
+  // consider the ESP32 disconnected and clear old readings.
+  // =========================================================
+  React.useEffect(() => {
+    const checkConnection = setInterval(() => {
+      const lastUpdate = lastFirebaseUpdate.current;
 
-    // No Firebase data has arrived yet
-    if (lastUpdate === 0) {
-      return;
-    }
+      // No Firebase data has arrived yet
+      if (lastUpdate === 0) {
+        return;
+      }
 
-    const timeSinceLastUpdate = Date.now() - lastUpdate;
+      const timeSinceLastUpdate = Date.now() - lastUpdate;
 
-    // ESP32 normally updates every few seconds.
-    // 15 seconds without an update = disconnected.
-    if (timeSinceLastUpdate > 15000) {
-      setConnectionStatus("disconnected");
+      // ESP32 normally updates every few seconds.
+      // 15 seconds without an update = disconnected.
+      if (timeSinceLastUpdate > 15000) {
+        setConnectionStatus("disconnected");
 
-      // Clear stale sensor values
-      setLatest(EMPTY_READING);
-      setGps(EMPTY_GPS);
+        // Clear stale sensor values
+        setLatest(EMPTY_READING);
+        setGps(EMPTY_GPS);
 
-      // Clear camera status
-      setCameraOnline(false);
-      setCamIp(null);
-    }
-  }, 3000);
+        // Clear camera status
+        setCameraOnline(false);
+        setCamIp(null);
+      }
+    }, 3000);
 
-  return () => clearInterval(checkConnection);
-}, []);
+    return () => clearInterval(checkConnection);
+  }, []);
   // Roll a PM history buffer for the Air Quality chart — only once real
   // readings start arriving.
   React.useEffect(() => {
@@ -2710,6 +2710,17 @@ React.useEffect(() => {
     <div className="live-shell">
 
       <aside className={"live-sidebar" + (menuOpen ? " open" : "")}>
+
+        {menuOpen && (
+          <button
+            type="button"
+            className="live-sidebar-close"
+            onClick={() => setMenuOpen(false)}
+            aria-label="Close menu"
+          >
+            <X size={22} />
+          </button>
+        )}
 
         <div className="side-logo">
           <div className="mini-logo">
