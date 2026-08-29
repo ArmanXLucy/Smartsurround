@@ -226,7 +226,7 @@ button {
 
   border: 1px solid var(--border);
 
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
 
   backdrop-filter: blur(20px);
 }
@@ -295,25 +295,19 @@ button {
   inset: 0;
 
   background-image:
-    linear-gradient(
-      rgba(33,20,15,0.045) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(33,20,15,0.045) 1px,
-      transparent 1px
-    );
+    linear-gradient(rgba(33, 20, 15, 0.045) 1px,
+      transparent 1px),
+    linear-gradient(90deg,
+      rgba(33, 20, 15, 0.045) 1px,
+      transparent 1px);
 
   background-size: 72px 72px;
 
   mask-image:
-    linear-gradient(
-      to bottom,
+    linear-gradient(to bottom,
       black 0%,
-      rgba(0,0,0,0.5) 60%,
-      transparent 100%
-    );
+      rgba(0, 0, 0, 0.5) 60%,
+      transparent 100%);
 
   opacity: 0.65;
 }
@@ -392,7 +386,7 @@ button {
   background: var(--orange);
 
   box-shadow:
-    0 0 0 5px rgba(255,116,23,0.08);
+    0 0 0 5px rgba(255, 116, 23, 0.08);
 }
 
 .hero h1 {
@@ -400,11 +394,9 @@ button {
 
   font-family: "Space Grotesk", sans-serif;
 
-  font-size: clamp(
-    50px,
-    7vw,
-    86px
-  );
+  font-size: clamp(50px,
+      7vw,
+      86px);
 
   line-height: 0.97;
 
@@ -414,12 +406,10 @@ button {
 }
 
 .hero-highlight {
-  background: linear-gradient(
-    100deg,
-    #21140f,
-    #6d4434,
-    #21140f
-  );
+  background: linear-gradient(100deg,
+      #21140f,
+      #6d4434,
+      #21140f);
 
   background-size: 200% auto;
 
@@ -457,7 +447,7 @@ button {
 
   font-size: 15px;
 
-  color: rgba(120,109,104,0.8);
+  color: rgba(120, 109, 104, 0.8);
 }
 
 .hero-buttons {
@@ -509,11 +499,11 @@ button {
 
   padding: 15px 22px;
 
-  border: 1px solid rgba(33,20,15,0.1);
+  border: 1px solid rgba(33, 20, 15, 0.1);
 
   border-radius: 999px;
 
-  background: rgba(255,255,255,0.65);
+  background: rgba(255, 255, 255, 0.65);
 
   font-size: 14px;
 
@@ -615,7 +605,7 @@ button {
 .dashboard {
   overflow: hidden;
 
-  border: 1px solid rgba(33,20,15,0.1);
+  border: 1px solid rgba(33, 20, 15, 0.1);
 
   border-radius: 30px;
 
@@ -688,7 +678,7 @@ button {
   background: #5dbd73;
 
   box-shadow:
-    0 0 0 4px rgba(93,189,115,0.1);
+    0 0 0 4px rgba(93, 189, 115, 0.1);
 }
 
 .dashboard-body {
@@ -712,7 +702,7 @@ button {
 
   background: white;
 
-  border: 1px solid rgba(33,20,15,0.06);
+  border: 1px solid rgba(33, 20, 15, 0.06);
 }
 
 .side-logo {
@@ -780,7 +770,7 @@ button {
   background: #261a15;
 
   box-shadow:
-    0 5px 12px rgba(33,20,15,0.15);
+    0 5px 12px rgba(33, 20, 15, 0.15);
 }
 
 .dashboard-main {
@@ -862,7 +852,7 @@ button {
 
   padding: 12px;
 
-  border: 1px solid rgba(33,20,15,0.06);
+  border: 1px solid rgba(33, 20, 15, 0.06);
 
   border-radius: 14px;
 
@@ -931,7 +921,7 @@ button {
 
   padding: 15px;
 
-  border: 1px solid rgba(33,20,15,0.06);
+  border: 1px solid rgba(33, 20, 15, 0.06);
 
   border-radius: 15px;
 
@@ -980,7 +970,7 @@ button {
 .ai-orbit {
   position: absolute;
 
-  border: 1px solid rgba(255,116,23,0.2);
+  border: 1px solid rgba(255, 116, 23, 0.2);
 
   border-radius: 50%;
 
@@ -997,8 +987,7 @@ button {
   height: 70px;
 
   transform:
-    translate(-50%, -50%)
-    rotate(20deg);
+    translate(-50%, -50%) rotate(20deg);
 }
 
 .orbit-two {
@@ -1006,8 +995,7 @@ button {
   height: 110px;
 
   transform:
-    translate(-50%, -50%)
-    rotate(-25deg);
+    translate(-50%, -50%) rotate(-25deg);
 
   animation-delay: 0.7s;
 }
@@ -1047,7 +1035,7 @@ button {
   background: var(--orange);
 
   box-shadow:
-    0 10px 30px rgba(255,116,23,0.3);
+    0 10px 30px rgba(255, 116, 23, 0.3);
 }
 
 .ai-footer {
@@ -1059,7 +1047,7 @@ button {
 
   padding-top: 8px;
 
-  border-top: 1px solid rgba(33,20,15,0.06);
+  border-top: 1px solid rgba(33, 20, 15, 0.06);
 
   color: #aaa19a;
 
@@ -1091,15 +1079,11 @@ button {
   inset: 0;
 
   background-image:
-    linear-gradient(
-      rgba(33,20,15,0.05) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(33,20,15,0.05) 1px,
-      transparent 1px
-    );
+    linear-gradient(rgba(33, 20, 15, 0.05) 1px,
+      transparent 1px),
+    linear-gradient(90deg,
+      rgba(33, 20, 15, 0.05) 1px,
+      transparent 1px);
 
   background-size: 25px 25px;
 }
@@ -1114,7 +1098,7 @@ button {
   background: white;
 
   box-shadow:
-    0 0 0 1px rgba(33,20,15,0.04);
+    0 0 0 1px rgba(33, 20, 15, 0.04);
 }
 
 .road-one {
@@ -1159,7 +1143,7 @@ button {
 
   transform: translate(-50%, -50%);
 
-  border: 5px solid rgba(255,255,255,0.8);
+  border: 5px solid rgba(255, 255, 255, 0.8);
 
   border-radius: 50%;
 
@@ -1168,7 +1152,7 @@ button {
   background: var(--orange);
 
   box-shadow:
-    0 10px 25px rgba(255,116,23,0.25);
+    0 10px 25px rgba(255, 116, 23, 0.25);
 }
 
 .event-row {
@@ -1190,7 +1174,7 @@ button {
 
   padding: 9px;
 
-  border: 1px solid rgba(33,20,15,0.06);
+  border: 1px solid rgba(33, 20, 15, 0.06);
 
   border-radius: 12px;
 
@@ -1263,14 +1247,14 @@ button {
 
   padding: 12px 14px;
 
-  border: 1px solid rgba(33,20,15,0.08);
+  border: 1px solid rgba(33, 20, 15, 0.08);
 
   border-radius: 14px;
 
-  background: rgba(255,255,255,0.92);
+  background: rgba(255, 255, 255, 0.92);
 
   box-shadow:
-    0 15px 40px rgba(33,20,15,0.12);
+    0 15px 40px rgba(33, 20, 15, 0.12);
 
   backdrop-filter: blur(12px);
 }
@@ -1390,23 +1374,17 @@ button {
   inset: -10%;
 
   background-image:
-    linear-gradient(
+    linear-gradient(rgba(33, 20, 15, 0.035) 1px,
+      transparent 1px),
+    linear-gradient(90deg,
       rgba(33, 20, 15, 0.035) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(33, 20, 15, 0.035) 1px,
-      transparent 1px
-    );
+      transparent 1px);
 
   background-size: 54px 54px;
 
-  mask-image: radial-gradient(
-    circle at 20% 10%,
-    black,
-    transparent 65%
-  );
+  mask-image: radial-gradient(circle at 20% 10%,
+      black,
+      transparent 65%);
 
   animation: aboutGridDrift 26s linear infinite;
 }
@@ -1515,11 +1493,9 @@ button {
 
   font-family: "Space Grotesk", sans-serif;
 
-  font-size: clamp(
-    42px,
-    5vw,
-    68px
-  );
+  font-size: clamp(42px,
+      5vw,
+      68px);
 
   line-height: 1;
 
@@ -1573,11 +1549,9 @@ button {
 
   border: 1px solid rgba(33, 20, 15, 0.06);
 
-  background: linear-gradient(
-    160deg,
-    rgba(255, 155, 92, 0.07),
-    rgba(255, 255, 255, 0)
-  );
+  background: linear-gradient(160deg,
+      rgba(255, 155, 92, 0.07),
+      rgba(255, 255, 255, 0));
 }
 
 .about-visual-grid {
@@ -1586,23 +1560,17 @@ button {
   inset: 0;
 
   background-image:
-    linear-gradient(
+    linear-gradient(rgba(33, 20, 15, 0.05) 1px,
+      transparent 1px),
+    linear-gradient(90deg,
       rgba(33, 20, 15, 0.05) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(33, 20, 15, 0.05) 1px,
-      transparent 1px
-    );
+      transparent 1px);
 
   background-size: 34px 34px;
 
-  mask-image: radial-gradient(
-    circle at 32% 42%,
-    black,
-    transparent 72%
-  );
+  mask-image: radial-gradient(circle at 32% 42%,
+      black,
+      transparent 72%);
 }
 
 .about-visual-lines {
@@ -1655,11 +1623,9 @@ button {
 
   border-radius: 50%;
 
-  background: conic-gradient(
-    from 0deg,
-    rgba(255, 116, 23, 0.4),
-    transparent 35%
-  );
+  background: conic-gradient(from 0deg,
+      rgba(255, 116, 23, 0.4),
+      transparent 35%);
 
   animation: radarSweepSpin 4s linear infinite;
 }
@@ -1828,11 +1794,9 @@ button {
 
   border-radius: 2px;
 
-  background: linear-gradient(
-    90deg,
-    var(--orange),
-    var(--orange-light)
-  );
+  background: linear-gradient(90deg,
+      var(--orange),
+      var(--orange-light));
 
   box-shadow: 0 0 8px rgba(255, 116, 23, 0.5);
 }
@@ -1851,7 +1815,7 @@ button {
   opacity: 0.55;
 }
 
-.capability > span {
+.capability>span {
   color: #aaa09a;
 
   font-size: 11px;
@@ -1893,7 +1857,7 @@ button {
   gap: 60px;
 }
 
-.features-heading > p {
+.features-heading>p {
   width: 340px;
 
   margin: 0 0 5px;
@@ -1922,7 +1886,7 @@ button {
 
   padding: 28px;
 
-  border: 1px solid rgba(33,20,15,0.08);
+  border: 1px solid rgba(33, 20, 15, 0.08);
 
   border-radius: 24px;
 
@@ -1935,7 +1899,7 @@ button {
   transform: translateY(-6px);
 
   box-shadow:
-    0 20px 50px rgba(33,20,15,0.08);
+    0 20px 50px rgba(33, 20, 15, 0.08);
 }
 
 .feature-icon {
@@ -2053,11 +2017,9 @@ button {
 
   border-radius: 2px;
 
-  background: linear-gradient(
-    90deg,
-    var(--orange),
-    var(--orange-light)
-  );
+  background: linear-gradient(90deg,
+      var(--orange),
+      var(--orange-light));
 
   box-shadow: 0 0 10px rgba(255, 116, 23, 0.45);
 }
@@ -2097,7 +2059,7 @@ button {
   align-items: center;
   justify-content: center;
 
-  border: 1px solid rgba(33,20,15,0.1);
+  border: 1px solid rgba(33, 20, 15, 0.1);
 
   border-radius: 50%;
 
@@ -2177,7 +2139,7 @@ button {
 
   border-radius: 50%;
 
-  background: rgba(255,116,23,0.13);
+  background: rgba(255, 116, 23, 0.13);
 
   filter: blur(100px);
 }
@@ -2195,7 +2157,7 @@ button {
 }
 
 .section-tag.light {
-  color: rgba(255,255,255,0.45);
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .ai-layout h2 {
@@ -2203,15 +2165,15 @@ button {
 }
 
 .ai-layout h2 span {
-  color: rgba(255,255,255,0.3);
+  color: rgba(255, 255, 255, 0.3);
 }
 
-.ai-layout > div:first-child > p {
+.ai-layout>div:first-child>p {
   max-width: 520px;
 
   margin-top: 30px;
 
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
 
   font-size: 15px;
 
@@ -2235,7 +2197,7 @@ button {
 
   gap: 10px;
 
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.7);
 
   font-size: 13px;
 }
@@ -2260,7 +2222,7 @@ button {
   left: 50%;
   top: 50%;
 
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 
   border-radius: 50%;
 
@@ -2274,8 +2236,7 @@ button {
   height: 190px;
 
   transform:
-    translate(-50%, -50%)
-    rotate(25deg);
+    translate(-50%, -50%) rotate(25deg);
 }
 
 .ring-medium {
@@ -2283,8 +2244,7 @@ button {
   height: 350px;
 
   transform:
-    translate(-50%, -50%)
-    rotate(-35deg);
+    translate(-50%, -50%) rotate(-35deg);
 
   animation-duration: 15s;
 }
@@ -2300,14 +2260,12 @@ button {
 
   from {
     transform:
-      translate(-50%, -50%)
-      rotate(0deg);
+      translate(-50%, -50%) rotate(0deg);
   }
 
   to {
     transform:
-      translate(-50%, -50%)
-      rotate(360deg);
+      translate(-50%, -50%) rotate(360deg);
   }
 
 }
@@ -2339,7 +2297,7 @@ button {
   background: var(--orange);
 
   box-shadow:
-    0 0 80px rgba(255,116,23,0.3);
+    0 0 80px rgba(255, 116, 23, 0.3);
 }
 
 .ai-core span {
@@ -2360,13 +2318,13 @@ button {
   align-items: center;
   justify-content: center;
 
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 
   border-radius: 12px;
 
   color: #ffad79;
 
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
 
   backdrop-filter: blur(10px);
 }
@@ -2415,11 +2373,9 @@ button {
   text-align: center;
 
   background:
-    radial-gradient(
-      circle at 50% 20%,
-      rgba(255,155,92,0.25),
-      transparent 45%
-    ),
+    radial-gradient(circle at 50% 20%,
+      rgba(255, 155, 92, 0.25),
+      transparent 45%),
     #f3e9e1;
 }
 
@@ -2468,7 +2424,7 @@ button {
   background: var(--orange);
 
   box-shadow:
-    0 10px 30px rgba(255,116,23,0.25);
+    0 10px 30px rgba(255, 116, 23, 0.25);
 }
 
 .contact-content .section-tag {
@@ -2524,11 +2480,9 @@ button {
 
   border-radius: 50%;
 
-  background: radial-gradient(
-    circle,
-    rgba(255, 116, 23, 0.18),
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      rgba(255, 116, 23, 0.18),
+      transparent 70%);
 
   filter: blur(50px);
 
@@ -2775,10 +2729,8 @@ button {
   }
 
   .section-container {
-    width: min(
-      100% - 30px,
-      1120px
-    );
+    width: min(100% - 30px,
+        1120px);
   }
 
   .about-section,
@@ -2793,7 +2745,29 @@ button {
   .how-heading h2,
   .ai-layout h2,
   .contact-content h2 {
-    font-size: 43px;
+    font-size: 32px;
+    line-height: 1.08;
+    letter-spacing: -0.045em;
+    width: 100%;
+    max-width: 100%;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 35px;
+    width: 100%;
+  }
+
+  .about-left {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .about-grid h2 {
+    width: 100%;
+    max-width: 100%;
   }
 
   .capability-grid {
@@ -2810,7 +2784,7 @@ button {
     display: block;
   }
 
-  .features-heading > p {
+  .features-heading>p {
     width: auto;
 
     margin-top: 25px;
@@ -3338,7 +3312,7 @@ button {
   letter-spacing: -0.02em;
 }
 
-.auth-showcase > p {
+.auth-showcase>p {
   max-width: 440px;
 
   margin-top: 14px;
@@ -3471,11 +3445,9 @@ button {
 
   color: white;
 
-  background: linear-gradient(
-    135deg,
-    var(--orange),
-    var(--orange-light)
-  );
+  background: linear-gradient(135deg,
+      var(--orange),
+      var(--orange-light));
 
   box-shadow: 0 10px 30px rgba(255, 116, 23, 0.35);
 }
@@ -3513,11 +3485,9 @@ button {
 
   border-radius: 999px;
 
-  background: linear-gradient(
-    90deg,
-    var(--orange),
-    var(--orange-light)
-  );
+  background: linear-gradient(90deg,
+      var(--orange),
+      var(--orange-light));
 }
 
 @media (max-width: 1100px) {
@@ -4426,7 +4396,7 @@ button {
   margin: 18px 0;
 }
 
-.device-status-row > div {
+.device-status-row>div {
   padding: 14px 16px;
 
   border-radius: 14px;
@@ -4606,7 +4576,7 @@ button {
   font-weight: 500;
 }
 
-.wide-card > span {
+.wide-card>span {
   color: var(--muted);
 
   font-size: 12.5px;
@@ -4660,7 +4630,7 @@ button {
   font-size: 17px;
 }
 
-.comfort-card > div > p {
+.comfort-card>div>p {
   margin: 4px 0 0;
 
   color: var(--muted);
@@ -4802,7 +4772,8 @@ button {
 
 @keyframes recBlink {
 
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
 
@@ -5533,6 +5504,7 @@ button {
   }
 
 }
+
 /* =========================================================
    SMARTSURROUND — MOBILE RESPONSIVE FIX
 ========================================================= */
@@ -6102,5 +6074,16 @@ svg {
 
   .live-sidebar-close:hover {
     background: rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* Remove decorative dots from About section */
+.about-ping {
+  display: none !important;
+}
+
+@media (max-width: 650px) {
+  .about-ping {
+    display: none !important;
   }
 }
