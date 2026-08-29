@@ -1709,54 +1709,54 @@ function AuthPage({ onAuthSuccess, onBack }) {
   const [passwordResetSent, setPasswordResetSent] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
- async function handleForgotPassword() {
-  setError("");
-  setPasswordResetSent(false);
+  async function handleForgotPassword() {
+    setError("");
+    setPasswordResetSent(false);
 
-  const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail = email.trim().toLowerCase();
 
-  if (!cleanEmail) {
-    setError("Please enter your email address first.");
-    return;
-  }
-
-  try {
-    setIsSubmitting(true);
-
-    // Check whether this email is registered
-    const methods = await fetchSignInMethodsForEmail(
-      firebaseAuth,
-      cleanEmail
-    );
-
-    if (!methods || methods.length === 0) {
-      setError("This email is not registered.");
+    if (!cleanEmail) {
+      setError("Please enter your email address first.");
       return;
     }
 
-    // Email exists — send reset email
-    await sendPasswordResetEmail(firebaseAuth, cleanEmail);
+    try {
+      setIsSubmitting(true);
 
-    setPasswordResetSent(true);
+      // Check whether this email is registered
+      const methods = await fetchSignInMethodsForEmail(
+        firebaseAuth,
+        cleanEmail
+      );
 
-  } catch (err) {
-    console.error("Password reset error:", err);
+      if (!methods || methods.length === 0) {
+        setError("This email is not registered.");
+        return;
+      }
 
-    if (err?.code === "auth/invalid-email") {
-      setError("Please enter a valid email address.");
-    } else if (err?.code === "auth/user-not-found") {
-      setError("This email is not registered.");
-    } else if (err?.code === "auth/too-many-requests") {
-      setError("Too many attempts. Please try again later.");
-    } else if (err?.code === "auth/network-request-failed") {
-      setError("Network error. Please check your internet connection.");
-    } else {
-      setError("Unable to send password reset email.");
+      // Email exists — send reset email
+      await sendPasswordResetEmail(firebaseAuth, cleanEmail);
+
+      setPasswordResetSent(true);
+
+    } catch (err) {
+      console.error("Password reset error:", err);
+
+      if (err?.code === "auth/invalid-email") {
+        setError("Please enter a valid email address.");
+      } else if (err?.code === "auth/user-not-found") {
+        setError("This email is not registered.");
+      } else if (err?.code === "auth/too-many-requests") {
+        setError("Too many attempts. Please try again later.");
+      } else if (err?.code === "auth/network-request-failed") {
+        setError("Network error. Please check your internet connection.");
+      } else {
+        setError("Unable to send password reset email.");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-  } finally {
-    setIsSubmitting(false);
   }
-}
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -2047,7 +2047,7 @@ function AuthPage({ onAuthSuccess, onBack }) {
               </div>
             )}
 
-            
+
             {error && <div className="auth-error">{error}</div>}
 
             <button
@@ -2374,7 +2374,7 @@ function LiveReadingPage({ currentUser, onLogout, onBackToSite }) {
   const [connectionStatus, setConnectionStatus] = React.useState(
     esp32Ip ? "connecting" : "disconnected"
   ); // "disconnected" | "connecting" | "connected" | "error"
-
+  const lastFirebaseUpdate = React.useRef(0);
   const [latest, setLatest] = React.useState(EMPTY_READING);
   const [gps, setGps] = React.useState(EMPTY_GPS);
   const [cameraOnline, setCameraOnline] = React.useState(false);
@@ -2436,6 +2436,8 @@ function LiveReadingPage({ currentUser, onLogout, onBackToSite }) {
       databaseRef,
       (snapshot) => {
         const root = snapshot.val();
+
+        lastFirebaseUpdate.current = Date.now();
 
         if (!root || typeof root !== "object") {
           setLatest(EMPTY_READING);
@@ -2583,7 +2585,39 @@ function LiveReadingPage({ currentUser, onLogout, onBackToSite }) {
 
     return () => unsubscribe();
   }, []);
+// =========================================================
+// ESP32 CONNECTION TIMEOUT
+// If Firebase stops receiving ESP32 updates for 15 seconds,
+// consider the ESP32 disconnected and clear old readings.
+// =========================================================
+React.useEffect(() => {
+  const checkConnection = setInterval(() => {
+    const lastUpdate = lastFirebaseUpdate.current;
 
+    // No Firebase data has arrived yet
+    if (lastUpdate === 0) {
+      return;
+    }
+
+    const timeSinceLastUpdate = Date.now() - lastUpdate;
+
+    // ESP32 normally updates every few seconds.
+    // 15 seconds without an update = disconnected.
+    if (timeSinceLastUpdate > 15000) {
+      setConnectionStatus("disconnected");
+
+      // Clear stale sensor values
+      setLatest(EMPTY_READING);
+      setGps(EMPTY_GPS);
+
+      // Clear camera status
+      setCameraOnline(false);
+      setCamIp(null);
+    }
+  }, 3000);
+
+  return () => clearInterval(checkConnection);
+}, []);
   // Roll a PM history buffer for the Air Quality chart — only once real
   // readings start arriving.
   React.useEffect(() => {
