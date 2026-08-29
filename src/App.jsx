@@ -3081,7 +3081,7 @@ function OverviewPage({ latest, alerts, connectionStatus }) {
 
       </div>
 
-      <div className="event-row">
+      {/* <div className="event-row">
 
         {alerts.length === 0 ? (
           <EventItem
@@ -3095,7 +3095,7 @@ function OverviewPage({ latest, alerts, connectionStatus }) {
           ))
         )}
 
-      </div>
+      </div> */}
 
     </div>
   );
