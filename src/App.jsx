@@ -3322,80 +3322,180 @@ function EnvironmentPage({ latest }) {
 }
 
 
-function CameraPage({ camIp, cameraOnline }) {
 
-  const [streamOk, setStreamOk] = React.useState(!!camIp);
-  const [snapKey, setSnapKey] = React.useState(0);
+function CameraPage() {
+  const [imageUrl, setImageUrl] = React.useState(null);
+  const [status, setStatus] = React.useState("CONNECTING");
+  const [error, setError] = React.useState("");
+  const [refreshKey, setRefreshKey] = React.useState(0);
+
+  const apiUrl = import.meta.env.VITE_CAMERA_API_URL;
+  const token = import.meta.env.VITE_CAMERA_TOKEN;
 
   React.useEffect(() => {
-    setStreamOk(!!camIp);
-  }, [camIp]);
+    let cancelled = false;
+    let timer;
+    let currentObjectUrl = null;
 
-  const streamUrl = camIp ? `http://${camIp}/stream` : null;
-  const isLive = streamOk && streamUrl && cameraOnline;
+    const loadFrame = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/api/frame`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server returned HTTP ${response.status}`);
+        }
+
+        const blob = await response.blob();
+
+        if (!blob.type.startsWith("image/")) {
+          throw new Error("The server did not return an image.");
+        }
+
+        const nextUrl = URL.createObjectURL(blob);
+
+        if (cancelled) {
+          URL.revokeObjectURL(nextUrl);
+          return;
+        }
+
+        const previousUrl = currentObjectUrl;
+        currentObjectUrl = nextUrl;
+
+        setImageUrl(nextUrl);
+        setStatus("LIVE");
+        setError("");
+
+        if (previousUrl) {
+          URL.revokeObjectURL(previousUrl);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error("Camera feed error:", err);
+          setStatus("OFFLINE");
+
+          if (err.message.includes("401")) {
+            setError("Authentication failed. Check the camera token.");
+          } else if (err.message.includes("404")) {
+            setError("The /api/frame endpoint was not found.");
+          } else {
+            setError("Unable to receive frames from Render.");
+          }
+        }
+      } finally {
+        if (!cancelled) {
+          timer = setTimeout(loadFrame, 500);
+        }
+      }
+    };
+
+    if (!apiUrl || !token) {
+      setStatus("OFFLINE");
+      setError("Missing VITE_CAMERA_API_URL or VITE_CAMERA_TOKEN in .env");
+      return;
+    }
+
+    loadFrame();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+
+      if (currentObjectUrl) {
+        URL.revokeObjectURL(currentObjectUrl);
+      }
+    };
+  }, [apiUrl, token, refreshKey]);
+
+  const reconnect = () => {
+    setStatus("CONNECTING");
+    setError("");
+    setRefreshKey((key) => key + 1);
+  };
+
+  const isLive = status === "LIVE";
 
   return (
     <div className="page-block">
-
       <div className="page-heading">
         <div>
           <div className="small-label">AI VISION</div>
           <h1>Live Camera Feed</h1>
-          <p>Real-time visual monitoring from the connected ESP32-CAM.</p>
+          <p>Visual monitoring from the ESP32-CAM through Render.</p>
         </div>
 
         <div className="dashboard-live">
           <span></span>
-          {isLive ? "STREAMING" : "OFFLINE"}
+          {isLive ? "ESP32 LIVE" : status}
         </div>
       </div>
 
       <div className="camera-card">
-
-        {isLive ? (
+        {imageUrl ? (
           <img
-            key={snapKey}
-            src={streamUrl}
-            alt="Live camera feed"
+            src={imageUrl}
+            alt="ESP32-CAM live feed"
             className="camera-stream"
-            onError={() => setStreamOk(false)}
           />
         ) : (
           <div className="camera-placeholder">
             <Video size={30} />
-            <h4>Camera feed unavailable</h4>
-            <p>
-              {camIp
-                ? "The ESP32-CAM hasn't checked in recently. Make sure it's powered and on the same network."
-                : "Waiting for the ESP32-CAM to report in via the main ESP32."}
-            </p>
+            <h4>
+              {status === "CONNECTING"
+                ? "Connecting to camera..."
+                : "Camera feed unavailable"}
+            </h4>
+            <p>{error || "Waiting for the ESP32-CAM to upload a frame."}</p>
           </div>
         )}
 
         <div className="camera-overlay-top">
           <span className="rec-dot"></span>
-          LIVE
+          {isLive ? "LIVE" : status}
         </div>
-
       </div>
 
       <div className="tile-grid three">
-        <StatTile label="Status" value={isLive ? "Streaming" : "Offline"} unit="" icon={<Video size={16} />} />
-        <StatTile label="Camera IP" value={camIp || "--"} unit="" icon={<Camera size={16} />} />
-        <StatTile label="Frame Rate" value={isLive ? "~15" : "--"} unit="fps" icon={<Activity size={16} />} />
+        <StatTile
+          label="Status"
+          value={isLive ? "Streaming" : "Offline"}
+          unit=""
+          icon={<Video size={16} />}
+        />
+
+        <StatTile
+          label="Connection"
+          value="Render Cloud"
+          unit=""
+          icon={<Activity size={16} />}
+        />
+
+        <StatTile
+          label="Refresh Rate"
+          value={isLive ? "~2" : "--"}
+          unit={isLive ? "requests/sec max" : ""}
+          icon={<Camera size={16} />}
+        />
       </div>
+
+      {error && (
+        <p role="alert" style={{ color: "#dc2626", marginTop: 12 }}>
+          {error}
+        </p>
+      )}
 
       <button
         type="button"
         className="secondary-button"
-        onClick={() => {
-          setStreamOk(!!camIp);
-          setSnapKey((k) => k + 1);
-        }}
+        onClick={reconnect}
       >
-        Reconnect Stream
+        Reconnect Camera
       </button>
-
     </div>
   );
 }
