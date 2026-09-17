@@ -3389,7 +3389,7 @@ function CameraPage() {
         }
       } finally {
         if (!cancelled) {
-          timer = setTimeout(loadFrame, 500);
+          timer = setTimeout(loadFrame, 0);
         }
       }
     };
