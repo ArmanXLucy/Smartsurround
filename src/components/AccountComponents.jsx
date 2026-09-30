@@ -381,7 +381,7 @@ function AccountPanel({ currentUser, section, onClose, onUserUpdated, onAppearan
       >
         <div className="account-panel-header">
           <div>
-            <div className="small-label">ACCOUNT MANAGEMENT</div>
+            <div className="small-label">{activeSection === "help" ? "HELP DESK" : "ACCOUNT MANAGEMENT"}</div>
             <h2 id="account-panel-title">{sectionTitle}</h2>
             <p>{sectionDescription}</p>
           </div>
@@ -390,17 +390,19 @@ function AccountPanel({ currentUser, section, onClose, onUserUpdated, onAppearan
           </button>
         </div>
 
-        <div className="account-panel-body">
-          <aside className="account-panel-nav account-panel-nav-settings-only">
-            <button className={activeSection === "settings" ? "active" : ""} onClick={() => setActiveSection("settings")} type="button">
-              <Settings size={17} /> Settings
-            </button>
-            <div className="account-panel-nav-divider" />
-            <button className="account-panel-logout-link" onClick={onLogout} type="button">
-              <LogOut size={17} /> Logout
-            </button>
-            <div className="account-panel-nav-note">Your profile, support tickets and preferences stay connected to this account.</div>
-          </aside>
+        <div className={`account-panel-body${activeSection === "help" ? " account-panel-body-help" : ""}`}>
+          {activeSection !== "help" && (
+            <aside className="account-panel-nav account-panel-nav-settings-only">
+              <button className={activeSection === "settings" ? "active" : ""} onClick={() => setActiveSection("settings")} type="button">
+                <Settings size={17} /> Settings
+              </button>
+              <div className="account-panel-nav-divider" />
+              <button className="account-panel-logout-link" onClick={onLogout} type="button">
+                <LogOut size={17} /> Logout
+              </button>
+              <div className="account-panel-nav-note">Your profile, support tickets and preferences stay connected to this account.</div>
+            </aside>
+          )}
 
           <section className="account-panel-content">
             {activeSection === "profile" && (

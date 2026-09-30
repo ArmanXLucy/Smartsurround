@@ -1,744 +1,221 @@
 import React from "react";
 import {
-  ArrowRight, ArrowUpRight, Check, ChevronDown, Menu, X, Sparkles, ShieldCheck, MapPin, Camera, Activity, CloudRain, Flame, Mic, Wind, BrainCircuit, User, Lock, Mail, LogOut, Eye, EyeOff, Thermometer, Droplets, Gauge, Satellite, Video, Table, Bell, Download, Play, Pause, Trash2, RotateCcw, Compass, Navigation, Save, Radio, FileText, Maximize2, Minimize2, AlertTriangle, Settings, HelpCircle, Upload, Paperclip, MessageSquare, Moon, Sun, Monitor, CheckCircle2, Clock3, Send, UserRound, motion, useAnimation, useInView, AnimatePresence, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, fetchSignInMethodsForEmail, onAuthStateChanged, signOut, updateProfile, reload, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateEmail, onValue, ref, getStorage, storageRef, uploadBytes, getDownloadURL, firebaseApp, db, firebaseAuth, firebaseStorage, BACKEND_URL, BACKEND_DISPLAY_URL, EMPTY_READING, EMPTY_GPS, NAV_ITEMS, DEFAULT_ALERT_SETTINGS, pm25Status, statusClass, getIaqColor, clamp, fmt, yVal, buildPath, buildAlerts, accountStorageKey, readAccountSettings, readLocalAvatar, saveLocalAvatar, formatAdminTime
+  Activity,
+  AlertTriangle,
+  BrainCircuit,
+  Camera,
+  CheckCircle2,
+  FileText,
+  Gauge,
+  ShieldCheck,
+  Upload,
+  Video,
+  BACKEND_DISPLAY_URL,
+  BACKEND_URL,
 } from "../lib/smartSurroundShared.jsx";
-
 import StatTile from "../components/StatTile.jsx";
 
-export default function CameraPage() {
-  const CAMERA_IP = "192.168.1.103";
+const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-  const [frameUrl, setFrameUrl] = React.useState(
-    `http://${CAMERA_IP}/capture?t=${Date.now()}`
-  );
+export default function CameraPage({ gps }) {
+  const [selectedImage, setSelectedImage] = React.useState(null);
+  const [imagePreview, setImagePreview] = React.useState("");
+  const [analysis, setAnalysis] = React.useState(null);
+  const [analyzing, setAnalyzing] = React.useState(false);
+  const [error, setError] = React.useState("");
+  const [submitted, setSubmitted] = React.useState(false);
+  const fileInputRef = React.useRef(null);
+  const analysisRequestRef = React.useRef(0);
+  const analysisControllerRef = React.useRef(null);
 
-  const [cameraRunning, setCameraRunning] =
-    React.useState(true);
+  React.useEffect(() => () => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+  }, [imagePreview]);
 
-  const [analysis, setAnalysis] =
-    React.useState(null);
-
-  const [analyzing, setAnalyzing] =
-    React.useState(false);
-
-  const [error, setError] =
-    React.useState("");
-
-  const frameTimer =
-    React.useRef(null);
-
-
-  // =========================================================
-  // LIVE CAMERA
-  // =========================================================
-
-  React.useEffect(() => {
-
-    if (!cameraRunning || analyzing) {
+  const selectImage = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
+      setError("Choose a JPG, JPEG, PNG, or WEBP image.");
+      event.target.value = "";
       return;
     }
-
-    const updateFrame = () => {
-
-      setFrameUrl(
-        `http://${CAMERA_IP}/capture?t=${Date.now()}`
-      );
-
-    };
-
-    frameTimer.current =
-      setInterval(updateFrame, 250);
-
-    return () => {
-
-      if (frameTimer.current) {
-
-        clearInterval(
-          frameTimer.current
-        );
-
-        frameTimer.current = null;
-      }
-
-    };
-
-  }, [cameraRunning, analyzing]);
-
-
-  // =========================================================
-  // CAPTURE + AI ANALYSIS
-  // =========================================================
+    analysisRequestRef.current += 1;
+    analysisControllerRef.current?.abort();
+    analysisControllerRef.current = null;
+    setAnalyzing(false);
+    setImagePreview(URL.createObjectURL(file));
+    setSelectedImage(file);
+    setAnalysis(null);
+    setSubmitted(false);
+    setError("");
+    event.target.value = "";
+  };
 
   const analyzeRoad = async () => {
-
-    if (analyzing) {
+    if (!selectedImage) {
+      setError("Upload an image before starting analysis.");
       return;
     }
-
-    console.log(
-      "Stopping live camera frames..."
-    );
+    if (analyzing) return;
 
     setAnalyzing(true);
     setError("");
     setAnalysis(null);
+    setSubmitted(false);
 
-    setCameraRunning(false);
-
-    if (frameTimer.current) {
-
-      clearInterval(
-        frameTimer.current
-      );
-
-      frameTimer.current = null;
-    }
-
-
+    const controller = new AbortController();
+    const requestId = ++analysisRequestRef.current;
+    analysisControllerRef.current = controller;
+    const timeoutId = window.setTimeout(() => controller.abort(), 60000);
     try {
-
-      /*
-       * Wait for the last /capture request
-       * to finish before calling /analyze.
-       */
-      await new Promise(
-        (resolve) =>
-          setTimeout(resolve, 700)
-      );
-
-
-      console.log(
-        "Requesting AI analysis..."
-      );
-
-
-      const controller =
-        new AbortController();
-
-
-      const timeoutId =
-        setTimeout(() => {
-
-          controller.abort();
-
-        }, 60000);
-
-
-      const response =
-        await fetch(
-          `http://${CAMERA_IP}/analyze`,
-          {
-            method: "GET",
-            cache: "no-store",
-            signal: controller.signal,
-          }
-        );
-
-
-      clearTimeout(timeoutId);
-
-
-      console.log(
-        "AI HTTP status:",
-        response.status
-      );
-
-
-      const data =
-        await response.json();
-
-
-      console.log(
-        "AI RESULT:",
-        data
-      );
-
-
-      if (!response.ok) {
-
-        throw new Error(
-          data.message ||
-          `AI server returned HTTP ${response.status}`
-        );
-
+      const formData = new FormData();
+      formData.append("image", selectedImage);
+      formData.append("description", "User-uploaded road image");
+      if (gps?.lat != null && gps?.lng != null) {
+        formData.append("lat", String(gps.lat));
+        formData.append("lon", String(gps.lng));
       }
 
-
-      if (!data.ok) {
-
-        throw new Error(
-          data.message ||
-          "AI analysis failed."
-        );
-
+      const response = await fetch(`${BACKEND_URL}/api/camera/analyze`, {
+        method: "POST",
+        body: formData,
+        cache: "no-store",
+        signal: controller.signal,
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.message || `AI server returned HTTP ${response.status}.`);
       }
-
-
-      /*
-       * IMPORTANT:
-       * The AI result is now stored in React state.
-       */
-      setAnalysis(data);
-
-
+      if (analysisRequestRef.current === requestId) setAnalysis(result);
     } catch (err) {
-
-      console.error(
-        "AI analysis error:",
-        err
-      );
-
-
-      if (
-        err.name ===
-        "AbortError"
-      ) {
-
-        setError(
-          "AI analysis timed out. Check ESP32-CAM and Flask server."
-        );
-
-      } else {
-
-        setError(
-          err.message ||
-          "Unable to analyze the road."
-        );
-
+      if (analysisRequestRef.current === requestId) {
+        setError(err?.name === "AbortError"
+          ? "AI analysis timed out. Please try again."
+          : err?.name === "TypeError"
+            ? `Unable to reach the AI server at ${BACKEND_DISPLAY_URL}. Check the backend and try again.`
+            : (err.message || "Unable to analyze the selected image."));
       }
-
     } finally {
-
-      /*
-       * Wait a little before restarting
-       * the camera.
-       */
-      await new Promise(
-        (resolve) =>
-          setTimeout(resolve, 500)
-      );
-
-
-      setFrameUrl(
-        `http://${CAMERA_IP}/capture?t=${Date.now()}`
-      );
-
-
-      setCameraRunning(true);
-      setAnalyzing(false);
-
-
-      console.log(
-        "Live camera restarted."
-      );
-
+      window.clearTimeout(timeoutId);
+      if (analysisRequestRef.current === requestId) {
+        analysisControllerRef.current = null;
+        setAnalyzing(false);
+      }
     }
-
   };
 
+  const removeImage = () => {
+    analysisRequestRef.current += 1;
+    analysisControllerRef.current?.abort();
+    analysisControllerRef.current = null;
+    setSelectedImage(null);
+    setImagePreview("");
+    setAnalysis(null);
+    setError("");
+    setSubmitted(false);
+    setAnalyzing(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
-  // =========================================================
-  // PAGE
-  // =========================================================
+  const isPothole = String(analysis?.damage_type || "").toLowerCase().includes("pothole");
+  const canSubmit = Boolean(isPothole && analysis?.queued_for_admin && analysis?.detection_id != null);
+  const analyzedImageUrl = analysis?.image
+    ? `${BACKEND_URL}${analysis.image}`
+    : "";
 
   return (
-
     <div className="page-block">
-
-
-      {/* =====================================================
-          HEADER
-      ===================================================== */}
-
       <div className="page-heading">
-
         <div>
-
-          <div className="small-label">
-            AI VISION
-          </div>
-
-          <h1>
-            Live Camera Feed
-          </h1>
-
-          <p>
-            Real-time road monitoring and
-            AI analysis using ESP32-CAM.
-          </p>
-
+          <div className="small-label">AI VISION</div>
+          <h1>Camera / Road Analysis</h1>
+          <p>Upload a road image and analyze it with the SmartSurround damage detection model.</p>
         </div>
-
-
-        <div className="dashboard-live">
-
-          <span></span>
-
-          {analyzing
-            ? "AI ANALYZING"
-            : cameraRunning
-              ? "ESP32 LIVE"
-              : "CAMERA"}
-
-        </div>
-
+        <div className="dashboard-live"><span />{analyzing ? "AI ANALYZING" : "IMAGE ANALYSIS"}</div>
       </div>
 
-
-
-      {/* =====================================================
-          CAMERA
-      ===================================================== */}
-
-      <div className="camera-card">
-
-        {cameraRunning ? (
-
-          <img
-            src={frameUrl}
-            alt="ESP32-CAM live feed"
-            className="camera-stream"
-            style={{
-              width: "100%",
-              height: "auto",
-              minHeight: "400px",
-              objectFit: "contain",
-              background: "#080808",
-              borderRadius: "16px",
-              display: "block",
-            }}
-          />
-
+      <div className="camera-card camera-upload-card">
+        {imagePreview ? (
+          <img className="camera-upload-preview" src={imagePreview} alt="Selected road for analysis" />
         ) : (
-
-          <div
-            className="camera-placeholder"
-            style={{
-              minHeight: "400px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-
-            <Camera size={35} />
-
-            <h4>
-
-              {analyzing
-                ? "Analyzing road..."
-                : "Camera paused"}
-
-            </h4>
-
-            <p>
-
-              {analyzing
-                ? "The ESP32-CAM image is being processed by the AI model."
-                : "Camera is preparing..."}
-
-            </p>
-
+          <div className="camera-upload-empty">
+            <Upload size={38} />
+            <strong>Upload an image to analyze</strong>
+            <span>JPG, PNG, or WEBP</span>
           </div>
-
         )}
-
-
-        <div className="camera-overlay-top">
-
-          <span className="rec-dot"></span>
-
-          {analyzing
-            ? "ANALYZING"
-            : cameraRunning
-              ? "LIVE"
-              : "PAUSED"}
-
-        </div>
-
+        {analyzing && <div className="camera-analyzing"><span />Analyzing image…</div>}
       </div>
 
-
-
-      {/* =====================================================
-          CAMERA INFORMATION
-      ===================================================== */}
-
-      <div className="tile-grid three">
-
-        <StatTile
-          label="Camera Status"
-          value={
-            analyzing
-              ? "Analyzing"
-              : cameraRunning
-                ? "Online"
-                : "Paused"
-          }
-          unit=""
-          icon={
-            <Video size={16} />
-          }
+      <div className="camera-upload-actions">
+        <input
+          ref={fileInputRef}
+          className="camera-file-input"
+          type="file"
+          accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+          onChange={selectImage}
+          aria-label="Choose a road image"
         />
-
-
-        <StatTile
-          label="Camera IP"
-          value={CAMERA_IP}
-          unit=""
-          icon={
-            <Camera size={16} />
-          }
-        />
-
-
-        <StatTile
-          label="AI Model"
-          value="Ready"
-          unit=""
-          icon={
-            <BrainCircuit size={16} />
-          }
-        />
-
-      </div>
-
-
-
-      {/* =====================================================
-          CAPTURE & ANALYZE BUTTON
-      ===================================================== */}
-
-      <div
-        style={{
-          marginTop: "20px",
-          marginBottom: "20px",
-        }}
-      >
-
-        <button
-          type="button"
-          className="primary-button"
-          onClick={analyzeRoad}
-          disabled={analyzing}
-          style={{
-            opacity:
-              analyzing ? 0.65 : 1,
-            cursor:
-              analyzing
-                ? "not-allowed"
-                : "pointer",
-          }}
-        >
-
-          <Camera size={17} />
-
-          {analyzing
-            ? "Capturing & Analyzing..."
-            : "Capture & Analyze"}
-
+        <button type="button" className="secondary-button" onClick={() => fileInputRef.current?.click()}>
+          <Upload size={16} /> {selectedImage ? "Choose Another Image" : "Upload Image"}
         </button>
-
+        <button type="button" className="primary-button" onClick={analyzeRoad} disabled={analyzing || !selectedImage}>
+          <Camera size={16} /> {analyzing ? "Analyzing…" : "Capture & Analyze"}
+        </button>
+        <button type="button" className="secondary-button camera-remove-button" onClick={removeImage} disabled={!selectedImage}>
+          Remove
+        </button>
       </div>
 
+      <div className="tile-grid three camera-status-grid">
+        <StatTile label="Analysis Source" value="Uploaded Image" unit="" icon={<Video size={16} />} />
+        <StatTile label="AI Model" value="Ready" unit="" icon={<BrainCircuit size={16} />} />
+        <StatTile label="Image Status" value={analysis ? "Analyzed" : selectedImage ? "Selected" : "Waiting"} unit="" icon={<Upload size={16} />} />
+      </div>
 
-
-      {/* =====================================================
-          ERROR
-      ===================================================== */}
-
-      {error && (
-
-        <div
-          style={{
-            padding:
-              "15px 18px",
-            marginBottom:
-              "20px",
-            borderRadius:
-              "12px",
-            background:
-              "rgba(239,68,68,0.08)",
-            border:
-              "1px solid rgba(239,68,68,0.25)",
-            color:
-              "#dc2626",
-          }}
-        >
-
-          <strong>
-            Analysis Error
-          </strong>
-
-          <div
-            style={{
-              marginTop: "5px",
-            }}
-          >
-            {error}
-          </div>
-
-        </div>
-
-      )}
-
-
-
-      {/* =====================================================
-          AI RESULT
-      ===================================================== */}
+      {error && <div className="camera-error" role="alert"><strong>Analysis Error</strong><span>{error}</span></div>}
 
       {analysis && (
-
-        <div
-          className="wide-card"
-          style={{
-            width: "100%",
-            padding: "24px",
-            marginTop: "20px",
-          }}
-        >
-
-
-          {/* =================================================
-              RESULT HEADER
-          ================================================= */}
-
+        <section className="wide-card camera-result-card" aria-labelledby="camera-result-title">
           <div className="card-header">
-
-            <div>
-
-              <div className="card-label">
-                AI ROAD ANALYSIS
-              </div>
-
-              <h3>
-                Detection Result
-              </h3>
-
+            <div><div className="card-label">AI ROAD ANALYSIS</div><h3 id="camera-result-title">Detection Result</h3></div>
+            <BrainCircuit size={20} />
+          </div>
+          <div className="tile-grid three camera-result-tiles">
+            <StatTile label="Road Condition" value={analysis.road_condition || "--"} unit="" icon={<Activity size={16} />} />
+            <StatTile label="Damage Type" value={analysis.damage_type || "--"} unit="" icon={<ShieldCheck size={16} />} />
+            <StatTile label="Confidence" value={typeof analysis.confidence === "number" ? `${(analysis.confidence * 100).toFixed(1)}%` : "--"} unit="" icon={<Gauge size={16} />} />
+            <StatTile label="Severity" value={analysis.severity || "--"} unit="" icon={<AlertTriangle size={16} />} />
+            <StatTile label="Admin Queue" value={analysis.queued_for_admin ? "Queued" : "Not Queued"} unit="" icon={<ShieldCheck size={16} />} />
+            <StatTile label="Detection ID" value={analysis.detection_id ?? "--"} unit="" icon={<FileText size={16} />} />
+          </div>
+          {analyzedImageUrl && (
+            <div className="camera-analyzed-image">
+              <div className="card-label">ANALYZED IMAGE</div>
+              <img src={analyzedImageUrl} alt="Image processed by road damage analysis" />
             </div>
-
-            <BrainCircuit
-              size={20}
-            />
-
-          </div>
-
-
-
-          {/* =================================================
-              ROW 1
-          ================================================= */}
-
-          <div
-            className="tile-grid three"
-            style={{
-              marginTop: "20px",
-            }}
-          >
-
-            <StatTile
-              label="Road Condition"
-              value={
-                analysis.road_condition ||
-                "--"
-              }
-              unit=""
-              icon={
-                <Activity
-                  size={16}
-                />
-              }
-            />
-
-
-            <StatTile
-              label="Damage Type"
-              value={
-                analysis.damage_type ||
-                "--"
-              }
-              unit=""
-              icon={
-                <ShieldCheck
-                  size={16}
-                />
-              }
-            />
-
-
-            <StatTile
-              label="Confidence"
-              value={
-                typeof analysis.confidence ===
-                  "number"
-                  ? (
-                    analysis.confidence *
-                    100
-                  ).toFixed(1) + "%"
-                  : "--"
-              }
-              unit=""
-              icon={
-                <Gauge
-                  size={16}
-                />
-              }
-            />
-
-          </div>
-
-
-
-          {/* =================================================
-              ROW 2
-          ================================================= */}
-
-          <div
-            className="tile-grid three"
-            style={{
-              marginTop: "15px",
-            }}
-          >
-
-            <StatTile
-              label="Severity"
-              value={
-                analysis.severity ||
-                "--"
-              }
-              unit=""
-              icon={
-                <AlertTriangle
-                  size={16}
-                />
-              }
-            />
-
-
-            <StatTile
-              label="Admin Queue"
-              value={
-                analysis.queued_for_admin
-                  ? "Queued"
-                  : "Not Queued"
-              }
-              unit=""
-              icon={
-                <ShieldCheck
-                  size={16}
-                />
-              }
-            />
-
-
-            <StatTile
-              label="Detection ID"
-              value={
-                analysis.detection_id ??
-                "--"
-              }
-              unit=""
-              icon={
-                <FileText
-                  size={16}
-                />
-              }
-            />
-
-          </div>
-
-
-
-          {/* =================================================
-              ANALYZED IMAGE
-          ================================================= */}
-
-          {analysis.image && (
-
-            <div
-              style={{
-                marginTop: "25px",
-              }}
-            >
-
-              <div className="card-label">
-                ANALYZED IMAGE
-              </div>
-
-
-              <img
-                src={
-                  `http://192.168.1.108:5000${analysis.image}`
-                }
-                alt="AI analyzed road"
-                style={{
-                  width: "100%",
-                  maxWidth: "800px",
-                  marginTop: "10px",
-                  borderRadius: "14px",
-                  display: "block",
-                }}
-              />
-
-            </div>
-
           )}
-
-
-
-          {/* =================================================
-              RESULT MESSAGE
-          ================================================= */}
-
-          <div
-            style={{
-              marginTop: "20px",
-              padding: "15px",
-              borderRadius: "12px",
-              background:
-                analysis.road_condition ===
-                  "damaged"
-                  ? "rgba(249,115,22,0.10)"
-                  : "rgba(34,197,94,0.10)",
-            }}
-          >
-
-            <strong>
-
-              {analysis.road_condition ===
-                "damaged"
-                ? "Road damage detected"
-                : "Road classified as normal"}
-
-            </strong>
-
-
-            <p
-              style={{
-                marginBottom: 0,
-                marginTop: "5px",
-              }}
-            >
-
-              {analysis.queued_for_admin
-
-                ? "This detection has been sent to the administrator verification queue."
-
-                : "The image was successfully processed by the AI model."}
-
-            </p>
-
+          <div className={`camera-result-message ${analysis.road_condition === "damaged" ? "is-damaged" : "is-normal"}`}>
+            <strong>{analysis.road_condition === "damaged" ? "Road damage detected" : "Road classified as normal"}</strong>
+            <span>{analysis.queued_for_admin ? "This detection is already in the administrator verification queue." : "The image was successfully processed by the AI model."}</span>
           </div>
-
-        </div>
-
+          {canSubmit && (
+            <div className="camera-submit-area">
+              {submitted ? (
+                <div className="camera-submitted-message"><CheckCircle2 size={18} /> Submitted to the administrator verification queue.</div>
+              ) : (
+                <>
+                  <p>This pothole detection is ready to be submitted. It will use the existing detection record.</p>
+                  <button type="button" className="primary-button" onClick={() => setSubmitted(true)}>
+                    <CheckCircle2 size={16} /> Submit
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </section>
       )}
-
     </div>
-
   );
 }
-
-

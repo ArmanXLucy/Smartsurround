@@ -119,63 +119,71 @@ function buildPath(points) {
 }
 
 
+const ALERT_SENSOR_KEYS = ["pm25", "pm10", "iaq", "co2", "voc", "humidity", "temperature"];
+
+function hasSensorReadings(reading) {
+  return ALERT_SENSOR_KEYS.some((key) => reading?.[key] !== null && reading?.[key] !== undefined && reading?.[key] !== "" && Number.isFinite(Number(reading[key])));
+}
+
 function buildAlerts(d, s) {
   const list = [];
-
-  // No real reading yet — don't fabricate alerts.
-  if (d.pm25 === null || d.pm25 === undefined) return list;
+  const hasReading = (key) => d[key] !== null && d[key] !== undefined && d[key] !== "" && Number.isFinite(Number(d[key]));
+  if (!hasSensorReadings(d)) return list;
 
   function add(icon, title, message, level) {
     list.push({ icon, title, message, level });
   }
 
-  if (Number(d.pm25) >= s.pm25Danger) {
-    add("🚨", "PM2.5 danger level", `PM2.5 is ${d.pm25} µg/m³. Consider filtration and ventilation.`, "Danger");
-  } else if (Number(d.pm25) >= s.pm25Warn) {
-    add("⚠️", "PM2.5 warning", `PM2.5 is ${d.pm25} µg/m³. Air quality is becoming unhealthy.`, "Warning");
+  if (hasReading("pm25") && Number(d.pm25) >= s.pm25Danger) {
+    add(<AlertTriangle size={16} />, "PM2.5 danger level", `PM2.5 is ${d.pm25} µg/m³. Consider filtration and ventilation.`, "Danger");
+  } else if (hasReading("pm25") && Number(d.pm25) >= s.pm25Warn) {
+    add(<Wind size={16} />, "PM2.5 warning", `PM2.5 is ${d.pm25} µg/m³. Air quality is becoming unhealthy.`, "Warning");
   }
 
-  if (Number(d.pm10) >= s.pm10Danger) {
-    add("🌪️", "PM10 danger level", `PM10 is ${d.pm10} µg/m³. Dust level is high.`, "Danger");
-  } else if (Number(d.pm10) >= s.pm10Warn) {
-    add("🌫️", "PM10 warning", `PM10 is ${d.pm10} µg/m³. Dust level is above your warning limit.`, "Warning");
+  if (hasReading("pm10") && Number(d.pm10) >= s.pm10Danger) {
+    add(<AlertTriangle size={16} />, "PM10 danger level", `PM10 is ${d.pm10} µg/m³. Dust level is high.`, "Danger");
+  } else if (hasReading("pm10") && Number(d.pm10) >= s.pm10Warn) {
+    add(<Wind size={16} />, "PM10 warning", `PM10 is ${d.pm10} µg/m³. Dust level is above your warning limit.`, "Warning");
   }
 
-  if (Number(d.iaq) >= s.iaqDanger) {
-    add("🛑", "IAQ danger level", `IAQ is ${Number(d.iaq).toFixed(0)}. Indoor air quality is unhealthy.`, "Danger");
-  } else if (Number(d.iaq) >= s.iaqWarn) {
-    add("⚠️", "IAQ warning", `IAQ is ${Number(d.iaq).toFixed(0)}. Air quality needs attention.`, "Warning");
+  if (hasReading("iaq") && Number(d.iaq) >= s.iaqDanger) {
+    add(<AlertTriangle size={16} />, "IAQ danger level", `IAQ is ${Number(d.iaq).toFixed(0)}. Indoor air quality is unhealthy.`, "Danger");
+  } else if (hasReading("iaq") && Number(d.iaq) >= s.iaqWarn) {
+    add(<Activity size={16} />, "IAQ warning", `IAQ is ${Number(d.iaq).toFixed(0)}. Air quality needs attention.`, "Warning");
   }
 
-  if (Number(d.co2) >= s.co2Danger) {
-    add("🫁", "CO2 danger level", `CO2 equivalent is ${Number(d.co2).toFixed(0)} ppm. Improve ventilation immediately.`, "Danger");
-  } else if (Number(d.co2) >= s.co2Warn) {
-    add("💨", "CO2 warning", `CO2 equivalent is ${Number(d.co2).toFixed(0)} ppm. Ventilation may be low.`, "Warning");
+  if (hasReading("co2") && Number(d.co2) >= s.co2Danger) {
+    add(<AlertTriangle size={16} />, "CO2 danger level", `CO2 equivalent is ${Number(d.co2).toFixed(0)} ppm. Improve ventilation immediately.`, "Danger");
+  } else if (hasReading("co2") && Number(d.co2) >= s.co2Warn) {
+    add(<Gauge size={16} />, "CO2 warning", `CO2 equivalent is ${Number(d.co2).toFixed(0)} ppm. Ventilation may be low.`, "Warning");
   }
 
-  if (Number(d.voc) >= s.vocDanger) {
-    add("🧪", "VOC danger level", `VOC equivalent is ${Number(d.voc).toFixed(2)} ppm. Possible chemical or odor source nearby.`, "Danger");
-  } else if (Number(d.voc) >= s.vocWarn) {
-    add("🧴", "VOC warning", `VOC equivalent is ${Number(d.voc).toFixed(2)} ppm. Check for perfumes, smoke, cleaners or solvents.`, "Warning");
+  if (hasReading("voc") && Number(d.voc) >= s.vocDanger) {
+    add(<AlertTriangle size={16} />, "VOC danger level", `VOC equivalent is ${Number(d.voc).toFixed(2)} ppm. Possible chemical or odor source nearby.`, "Danger");
+  } else if (hasReading("voc") && Number(d.voc) >= s.vocWarn) {
+    add(<Activity size={16} />, "VOC warning", `VOC equivalent is ${Number(d.voc).toFixed(2)} ppm. Check for perfumes, smoke, cleaners or solvents.`, "Warning");
   }
 
-  if (Number(d.humidity) < s.humMin) {
-    add("💧", "Low humidity", `Humidity is ${Number(d.humidity).toFixed(0)}%. Air may feel dry.`, "Warning");
-  } else if (Number(d.humidity) > s.humMax) {
-    add("💦", "High humidity", `Humidity is ${Number(d.humidity).toFixed(0)}%. Risk of discomfort or moisture buildup.`, "Warning");
+  if (hasReading("humidity") && Number(d.humidity) < s.humMin) {
+    add(<Droplets size={16} />, "Low humidity", `Humidity is ${Number(d.humidity).toFixed(0)}%. Air may feel dry.`, "Warning");
+  } else if (hasReading("humidity") && Number(d.humidity) > s.humMax) {
+    add(<Droplets size={16} />, "High humidity", `Humidity is ${Number(d.humidity).toFixed(0)}%. Risk of discomfort or moisture buildup.`, "Warning");
   }
 
-  if (Number(d.temperature) < s.tempMin) {
-    add("❄️", "Low temperature", `Temperature is ${Number(d.temperature).toFixed(1)} °C. Room is below comfort limit.`, "Warning");
-  } else if (Number(d.temperature) > s.tempMax) {
-    add("🔥", "High temperature", `Temperature is ${Number(d.temperature).toFixed(1)} °C. Room is above comfort limit.`, "Warning");
+  if (hasReading("temperature") && Number(d.temperature) < s.tempMin) {
+    add(<Thermometer size={16} />, "Low temperature", `Temperature is ${Number(d.temperature).toFixed(1)} °C. Room is below comfort limit.`, "Warning");
+  } else if (hasReading("temperature") && Number(d.temperature) > s.tempMax) {
+    add(<Thermometer size={16} />, "High temperature", `Temperature is ${Number(d.temperature).toFixed(1)} °C. Room is above comfort limit.`, "Warning");
   }
 
   if (list.length === 0) {
-    add("✅", "All readings normal", "PM, IAQ, CO2, VOC, temperature and humidity are within the configured limits.", "Good");
+    const allReadingsPresent = ALERT_SENSOR_KEYS.every(hasReading);
+    add(<CheckCircle2 size={16} />, "All readings normal", allReadingsPresent
+      ? "All readings are within the configured limits."
+      : "Available readings are within the configured limits.", "Good");
   }
 
-  add("📡", "Device status", "SmartSurround is serving live readings from the connected sensors.", "Info");
+  add(<Activity size={16} />, "Device status", "SmartSurround is serving live readings from the connected sensors.", "Info");
 
   return list;
 }
@@ -188,7 +196,7 @@ const NAV_ITEMS = [
   { id: "environment", label: "Environment", icon: <Thermometer size={15} /> },
   { id: "camera", label: "Camera", icon: <Video size={15} /> },
   { id: "location", label: "Location", icon: <MapPin size={15} /> },
-  { id: "datalog", label: "Data Log", icon: <Table size={15} /> },
+  { id: "account-help", label: "Help Desk", icon: <HelpCircle size={15} /> },
   { id: "alerts", label: "Alerts", icon: <Bell size={15} /> },
 ];
 
@@ -310,6 +318,7 @@ export {
   yVal,
   buildPath,
   buildAlerts,
+  hasSensorReadings,
   accountStorageKey,
   readAccountSettings,
   readLocalAvatar,

@@ -8760,3 +8760,93 @@ svg {
 .sc-admin-map-overlay { position:absolute;inset:0;display:grid;place-items:center;background:rgba(243,238,232,.82);color:var(--muted);font-size:10px;font-weight:600;pointer-events:none;z-index:402; }
 .sc-admin-map-status { position:absolute;left:10px;top:10px;z-index:401;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.92);border:1px solid rgba(33,20,15,.08);color:var(--muted);font-size:8px;font-weight:700; }
 .sc-admin-map-status span { display:inline-block;width:6px;height:6px;margin-right:5px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 3px rgba(255,116,23,.12); }
+
+/* User image-analysis and alert summaries. */
+.camera-upload-card {
+  position: relative;
+  min-height: clamp(280px, 48vw, 500px);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #080808;
+}
+.camera-upload-preview { width: 100%; height: 100%; min-height: inherit; max-height: 500px; object-fit: contain; display: block; }
+.camera-upload-empty { min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; color: rgba(255,255,255,.82); text-align: center; }
+.camera-upload-empty svg { color: var(--orange); }
+.camera-upload-empty strong { font-size: 15px; }
+.camera-upload-empty span { color: rgba(255,255,255,.55); font-size: 11px; }
+.camera-analyzing { position: absolute; inset: auto 14px 14px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: 10px; background: rgba(0,0,0,.72); color: white; font-size: 12px; }
+.camera-analyzing span { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); animation: cameraPulse 1s ease-in-out infinite; }
+@keyframes cameraPulse { 50% { opacity: .35; } }
+.camera-upload-actions { display: flex; flex-wrap: wrap; gap: 9px; margin: 14px 0 18px; }
+.camera-file-input { display: none; }
+.camera-upload-actions button:disabled { opacity: .55; cursor: not-allowed; }
+.camera-remove-button { border-color: rgba(220,38,38,.28); color: #b91c1c; }
+.camera-remove-button:hover:not(:disabled) { border-color: rgba(220,38,38,.5); background: rgba(239,68,68,.06); color: #991b1b; }
+.camera-remove-button:disabled { opacity: .45; cursor: not-allowed; }
+.camera-status-grid { margin-bottom: 16px; }
+.camera-error { display: flex; flex-direction: column; gap: 5px; margin: 14px 0; padding: 14px 16px; border: 1px solid rgba(239,68,68,.25); border-radius: 12px; background: rgba(239,68,68,.08); color: #dc2626; font-size: 12px; }
+.camera-result-card { margin-top: 18px; }
+.camera-result-tiles { margin-top: 18px; }
+.camera-analyzed-image { margin-top: 22px; }
+.camera-analyzed-image img { display: block; width: 100%; max-width: 800px; max-height: 460px; margin-top: 10px; border-radius: 12px; object-fit: contain; background: #080808; }
+.camera-result-message { display: flex; flex-direction: column; gap: 5px; margin-top: 18px; padding: 14px; border-radius: 11px; font-size: 12px; }
+.camera-result-message span { line-height: 1.55; }
+.camera-result-message.is-damaged { background: rgba(249,115,22,.1); }
+.camera-result-message.is-normal { background: rgba(34,197,94,.1); }
+.camera-submit-area { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-top: 14px; padding: 14px; border: 1px solid rgba(255,116,23,.22); border-radius: 12px; background: rgba(255,116,23,.05); }
+.camera-submit-area p { margin: 0; color: var(--muted); font-size: 11px; }
+.camera-submitted-message { display: flex; align-items: center; gap: 8px; color: #16803a; font-size: 12px; font-weight: 600; }
+.user-alerts-list { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.user-alert-empty { display: flex; align-items: center; gap: 12px; padding: 20px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface, white); color: #16803a; }
+.user-alert-empty div { display: flex; flex-direction: column; gap: 4px; }
+.user-alert-empty strong { color: var(--text); font-size: 13px; }
+.user-alert-empty span { color: var(--muted); font-size: 11px; }
+.overview-alerts { margin-top: 18px; padding: 18px; border: 1px solid var(--border); border-radius: 15px; background: white; }
+.overview-alerts-heading { display: flex; align-items: center; justify-content: space-between; color: var(--orange); }
+.overview-alerts-status { display: flex; align-items: center; gap: 7px; }
+.overview-alert-priority { padding: 5px 9px; border-radius: 999px; background: rgba(34,197,94,.1); color: #16803a; font-size: 9px; font-weight: 700; text-transform: uppercase; }
+.overview-alert-priority.level-warning { background: rgba(249,115,22,.12); color: #c2410c; }
+.overview-alert-priority.level-danger { background: rgba(239,68,68,.12); color: #b91c1c; }
+.overview-alert-priority.level-normal { background: rgba(34,197,94,.1); color: #16803a; }
+.overview-alerts-heading h2 { margin: 4px 0 0; color: var(--text); font-size: 16px; }
+.overview-alert-list { display: grid; gap: 9px; margin-top: 14px; }
+.overview-alert-item { display: grid; grid-template-columns: 26px minmax(0,1fr) auto; align-items: start; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: 11px; }
+.overview-alert-symbol { font-size: 16px; }
+.overview-alert-item strong { color: var(--text); font-size: 11px; }
+.overview-alert-item p { margin: 4px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+.overview-alert-item.level-danger { border-color: rgba(239,68,68,.25); }
+.overview-alert-item.level-warning { border-color: rgba(249,115,22,.25); }
+.overview-alert-severity { color: var(--muted); font-size: 9px; font-weight: 700; text-transform: uppercase; }
+.overview-alert-healthy { display: flex; align-items: center; gap: 9px; margin-top: 14px; padding: 13px; border-radius: 10px; background: rgba(34,197,94,.08); color: #16803a; font-size: 11px; }
+.live-shell.theme-dark .overview-alerts,
+.live-shell.theme-dark .user-alert-empty { border-color: rgba(255,255,255,.1); background: #211d1a; }
+.live-shell.theme-dark .overview-alert-item { border-color: rgba(255,255,255,.1); background: #29231f; }
+.live-shell.theme-dark .overview-alert-healthy { background: rgba(34,197,94,.12); color: #86efac; }
+.live-shell.theme-dark .camera-error { color: #fca5a5; }
+.live-shell.theme-dark .camera-submitted-message { color: #86efac; }
+.live-shell.theme-dark .camera-remove-button { border-color: rgba(248,113,113,.4); color: #fca5a5; }
+.live-shell.theme-dark .overview-alert-priority.level-warning { color: #fdba74; }
+.live-shell.theme-dark .overview-alert-priority.level-danger { color: #fca5a5; }
+.live-shell.theme-dark .overview-alert-priority.level-normal { color: #86efac; }
+@media (max-width: 600px) {
+  .camera-upload-card { min-height: 260px; }
+  .camera-upload-preview { min-height: 260px; }
+  .camera-upload-actions { display: grid; grid-template-columns: 1fr; }
+  .camera-upload-actions button { justify-content: center; }
+  .camera-result-tiles { grid-template-columns: 1fr; }
+  .overview-alerts { padding: 14px; }
+}
+
+/* The embedded Help Desk uses the full dashboard width without account controls. */
+.account-panel-body-help { grid-template-columns: minmax(0, 1fr); }
+.account-panel-body-help .account-panel-content { padding: 22px 26px 28px; }
+.account-panel-body-help .account-help-layout { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) {
+  .account-panel-body-help { grid-template-columns: minmax(0, 1fr); }
+  .account-panel-body-help .account-help-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .account-panel-body-help .account-panel-content { padding: 16px; }
+}
+

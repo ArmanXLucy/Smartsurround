@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  ArrowRight, ArrowUpRight, Check, ChevronDown, Menu, X, Sparkles, ShieldCheck, MapPin, Camera, Activity, CloudRain, Flame, Mic, Wind, BrainCircuit, User, Lock, Mail, LogOut, Eye, EyeOff, Thermometer, Droplets, Gauge, Satellite, Video, Table, Bell, Download, Play, Pause, Trash2, RotateCcw, Compass, Navigation, Save, Radio, FileText, Maximize2, Minimize2, AlertTriangle, Settings, HelpCircle, Upload, Paperclip, MessageSquare, Moon, Sun, Monitor, CheckCircle2, Clock3, Send, UserRound, motion, useAnimation, useInView, AnimatePresence, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, fetchSignInMethodsForEmail, onAuthStateChanged, signOut, updateProfile, reload, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateEmail, onValue, ref, getStorage, storageRef, uploadBytes, getDownloadURL, firebaseApp, db, firebaseAuth, firebaseStorage, BACKEND_URL, BACKEND_DISPLAY_URL, EMPTY_READING, EMPTY_GPS, NAV_ITEMS, DEFAULT_ALERT_SETTINGS, pm25Status, statusClass, getIaqColor, clamp, fmt, yVal, buildPath, buildAlerts, accountStorageKey, readAccountSettings, readLocalAvatar, saveLocalAvatar, formatAdminTime
+  ArrowRight, ArrowUpRight, Check, ChevronDown, Menu, X, Sparkles, ShieldCheck, MapPin, Camera, Activity, CloudRain, Flame, Mic, Wind, BrainCircuit, User, Lock, Mail, LogOut, Eye, EyeOff, Thermometer, Droplets, Gauge, Satellite, Video, Table, Bell, Download, Play, Pause, Trash2, RotateCcw, Compass, Navigation, Save, Radio, FileText, Maximize2, Minimize2, AlertTriangle, Settings, HelpCircle, Upload, Paperclip, MessageSquare, Moon, Sun, Monitor, CheckCircle2, Clock3, Send, UserRound, motion, useAnimation, useInView, AnimatePresence, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, fetchSignInMethodsForEmail, onAuthStateChanged, signOut, updateProfile, reload, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateEmail, onValue, ref, getStorage, storageRef, uploadBytes, getDownloadURL, firebaseApp, db, firebaseAuth, firebaseStorage, BACKEND_URL, BACKEND_DISPLAY_URL, EMPTY_READING, EMPTY_GPS, NAV_ITEMS, DEFAULT_ALERT_SETTINGS, pm25Status, statusClass, getIaqColor, clamp, fmt, yVal, buildPath, buildAlerts, hasSensorReadings, accountStorageKey, readAccountSettings, readLocalAvatar, saveLocalAvatar, formatAdminTime
 } from "../lib/smartSurroundShared.jsx";
 
 import StatTile from "../components/StatTile.jsx";
@@ -12,6 +12,10 @@ export default function OverviewPage({ latest, alerts, connectionStatus }) {
   const gaugeDeg = hasIaq ? (clamp(iaq, 0, 500) / 500) * 360 : 0;
   const gaugeColor = hasIaq ? getIaqColor(iaq) : "#c9beb7";
   const pms = latest.pm25 !== null && latest.pm25 !== undefined ? pm25Status(Number(latest.pm25)) : null;
+  const currentAlerts = alerts.filter((alert) => ["warning", "danger"].includes(String(alert.level).toLowerCase()));
+  const highestAlertLevel = currentAlerts.some((alert) => String(alert.level).toLowerCase() === "danger")
+    ? "Danger"
+    : currentAlerts.length ? "Warning" : "Normal";
 
   const statusText =
     connectionStatus === "connected"
@@ -143,6 +147,36 @@ export default function OverviewPage({ latest, alerts, connectionStatus }) {
 
       </div>
 
+      <section className="overview-alerts" aria-labelledby="overview-alerts-title">
+        <div className="overview-alerts-heading">
+          <div><div className="small-label">SENSOR STATUS</div><h2 id="overview-alerts-title">Current Alerts</h2></div>
+          <div className="overview-alerts-status">
+            <Bell size={16} />
+            <span className={`overview-alert-priority level-${highestAlertLevel.toLowerCase()}`}>
+              {hasSensorReadings(latest) ? highestAlertLevel : "Waiting for data"}
+            </span>
+          </div>
+        </div>
+        {currentAlerts.length ? (
+          <div className="overview-alert-list">
+            {currentAlerts.map((alert, index) => (
+              <article className={`overview-alert-item level-${String(alert.level).toLowerCase()}`} key={`${alert.title}-${index}`}>
+                <span className="overview-alert-symbol">{alert.icon}</span>
+                <div><strong>{alert.title}</strong><p>{alert.message}</p></div>
+                <span className="overview-alert-severity">{alert.level}</span>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="overview-alert-healthy">
+            <ShieldCheck size={19} />
+            <span>{hasSensorReadings(latest)
+              ? (alerts.find((alert) => String(alert.level).toLowerCase() === "good")?.message || "Available readings are within configured limits.")
+              : "Waiting for sensor readings to confirm alert status."}</span>
+          </div>
+        )}
+      </section>
+
       {/* <div className="event-row">
 
         {alerts.length === 0 ? (
@@ -162,5 +196,3 @@ export default function OverviewPage({ latest, alerts, connectionStatus }) {
     </div>
   );
 }
-
-

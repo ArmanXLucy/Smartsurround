@@ -13,7 +13,6 @@ import CameraPage from "./CameraPage.jsx";
 import LocationPage from "./LocationPage.jsx";
 import DataLogPage from "./DataLogPage.jsx";
 import AlertsPage from "./AlertsPage.jsx";
-import SafetyPage from "./SafetyPage.jsx";
 
 export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, onUserUpdated }) {
 
@@ -26,14 +25,17 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
     "/dashboard/environment": "environment",
     "/dashboard/camera": "camera",
     "/dashboard/location": "location",
-    "/dashboard/data-log": "datalog",
     "/dashboard/alerts": "alerts",
-    "/dashboard/safety": "safety",
     "/profile": "account-profile",
     "/help": "account-help",
     "/settings": "account-settings",
   };
   const activePage = dashboardPageByPath[pathname] || "overview";
+
+  React.useEffect(() => {
+    if (pathname === "/dashboard/data-log") navigate("/help", { replace: true });
+    if (pathname === "/dashboard/safety") navigate("/dashboard/overview", { replace: true });
+  }, [navigate, pathname]);
 
   const dashboardPathFor = (page) => {
     if (page === "overview") return "/dashboard/overview";
@@ -41,9 +43,7 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
     if (page === "environment") return "/dashboard/environment";
     if (page === "camera") return "/dashboard/camera";
     if (page === "location") return "/dashboard/location";
-    if (page === "datalog") return "/dashboard/data-log";
     if (page === "alerts") return "/dashboard/alerts";
-    if (page === "safety") return "/dashboard/safety";
     if (page === "account-profile") return "/profile";
     if (page === "account-help") return "/help";
     if (page === "account-settings") return "/settings";
@@ -544,16 +544,6 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
 
   }, [loggerRunning, loggerInterval, latest, connectionStatus]);
 
-  function saveAlertSettings(next) {
-    setAlertSettings(next);
-    window.localStorage.setItem("smartsurround_alert_settings", JSON.stringify(next));
-  }
-
-  function resetAlertSettings() {
-    setAlertSettings(DEFAULT_ALERT_SETTINGS);
-    window.localStorage.removeItem("smartsurround_alert_settings");
-  }
-
   const alerts = React.useMemo(() => buildAlerts(latest, alertSettings), [latest, alertSettings]);
 
   function exportLogExcel() {
@@ -629,20 +619,7 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
           </button>
         ))}
 
-        <div className="sidebar-title second-title">SYSTEM</div>
-
-        <button
-          type="button"
-          className={"side-link" + (activePage === "safety" ? " active" : "")}
-          onClick={() => {
-            setAccountPanelOpen(false);
-            navigate(dashboardPathFor("safety"));
-            setMenuOpen(false);
-          }}
-        >
-          <ShieldCheck size={15} />
-          Safety
-        </button>
+        {/* <div className="sidebar-title second-title">SYSTEM</div> */}
 
         <div className="sidebar-footer-card">
           <div className="sidebar-footer-icon">
@@ -753,7 +730,7 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
 
           {!isAccountPage && activePage === "environment" && <EnvironmentPage latest={latest} />}
 
-          {!isAccountPage && activePage === "camera" && <CameraPage camIp={camIp} cameraOnline={cameraOnline} />}
+          {!isAccountPage && activePage === "camera" && <CameraPage gps={gps} />}
 
           {!isAccountPage && activePage === "location" && <LocationPage gps={gps} />}
 
@@ -790,13 +767,8 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
           {!isAccountPage && activePage === "alerts" && (
             <AlertsPage
               alerts={alerts}
-              alertSettings={alertSettings}
-              onSave={saveAlertSettings}
-              onReset={resetAlertSettings}
             />
           )}
-
-          {!isAccountPage && activePage === "safety" && <SafetyPage />}
 
         </div>
 
@@ -820,4 +792,3 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
 /* =========================================================
    LIVE DASHBOARD — PAGE COMPONENTS
 ========================================================= */
-
