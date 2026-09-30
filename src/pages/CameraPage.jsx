@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Upload,
   Video,
+  X,
   BACKEND_DISPLAY_URL,
   BACKEND_URL,
 } from "../lib/smartSurroundShared.jsx";
@@ -17,16 +18,20 @@ import StatTile from "../components/StatTile.jsx";
 
 const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-export default function CameraPage({ gps }) {
+export default function CameraPage({ gps, camIp }) {
   const [selectedImage, setSelectedImage] = React.useState(null);
   const [imagePreview, setImagePreview] = React.useState("");
   const [analysis, setAnalysis] = React.useState(null);
   const [analyzing, setAnalyzing] = React.useState(false);
   const [error, setError] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
+  const [imageSource, setImageSource] = React.useState("");
+  const [capturing, setCapturing] = React.useState(false);
   const fileInputRef = React.useRef(null);
   const analysisRequestRef = React.useRef(0);
   const analysisControllerRef = React.useRef(null);
+  const captureRequestRef = React.useRef(0);
+  const captureControllerRef = React.useRef(null);
 
   React.useEffect(() => () => {
     if (imagePreview) URL.revokeObjectURL(imagePreview);
@@ -43,9 +48,14 @@ export default function CameraPage({ gps }) {
     analysisRequestRef.current += 1;
     analysisControllerRef.current?.abort();
     analysisControllerRef.current = null;
+    captureRequestRef.current += 1;
+    captureControllerRef.current?.abort();
+    captureControllerRef.current = null;
+    setCapturing(false);
     setAnalyzing(false);
     setImagePreview(URL.createObjectURL(file));
     setSelectedImage(file);
+    setImageSource("upload");
     setAnalysis(null);
     setSubmitted(false);
     setError("");
@@ -105,16 +115,67 @@ export default function CameraPage({ gps }) {
     }
   };
 
+  const captureImage = async () => {
+    if (capturing || analyzing) return;
+    const cameraHostValue = String(camIp || "").trim() || "192.168.1.103";
+    const cameraHost = cameraHostValue.split("://").pop().split("/")[0];
+    const controller = new AbortController();
+    const requestId = ++captureRequestRef.current;
+    captureControllerRef.current = controller;
+    const timeoutId = window.setTimeout(() => controller.abort(), 20000);
+    setCapturing(true);
+    setError("");
+    try {
+      const response = await fetch(`http://${cameraHost}/capture?t=${Date.now()}`, {
+        method: "GET",
+        cache: "no-store",
+        signal: controller.signal,
+      });
+      if (!response.ok) throw new Error(`Camera returned HTTP ${response.status}.`);
+      const blob = await response.blob();
+      if (!blob.size || (blob.type && !blob.type.startsWith("image/"))) {
+        throw new Error("The camera did not return a valid image.");
+      }
+      if (captureRequestRef.current !== requestId) return;
+      const capturedImage = new File([blob], `camera_capture_${Date.now()}.jpg`, { type: blob.type || "image/jpeg" });
+      setImagePreview(URL.createObjectURL(capturedImage));
+      setSelectedImage(capturedImage);
+      setImageSource("capture");
+      setAnalysis(null);
+      setSubmitted(false);
+      setError("");
+    } catch (err) {
+      if (captureRequestRef.current === requestId) {
+        setError(err?.name === "AbortError"
+          ? "Camera capture timed out. Check the ESP32-CAM connection and try again."
+          : err?.name === "TypeError"
+            ? `Unable to capture an image from the ESP32-CAM at ${cameraHost}. Check the camera connection and try again.`
+            : (err.message || "Unable to capture an image from the ESP32-CAM."));
+      }
+    } finally {
+      window.clearTimeout(timeoutId);
+      if (captureRequestRef.current === requestId) {
+        captureControllerRef.current = null;
+        setCapturing(false);
+      }
+    }
+  };
+
   const removeImage = () => {
     analysisRequestRef.current += 1;
     analysisControllerRef.current?.abort();
     analysisControllerRef.current = null;
+    captureRequestRef.current += 1;
+    captureControllerRef.current?.abort();
+    captureControllerRef.current = null;
     setSelectedImage(null);
     setImagePreview("");
     setAnalysis(null);
+    setImageSource("");
     setError("");
     setSubmitted(false);
     setAnalyzing(false);
+    setCapturing(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -145,7 +206,7 @@ export default function CameraPage({ gps }) {
             <span>JPG, PNG, or WEBP</span>
           </div>
         )}
-        {analyzing && <div className="camera-analyzing"><span />Analyzing image…</div>}
+        {(analyzing || capturing) && <div className="camera-analyzing"><span />{capturing ? "Capturing image…" : "Analyzing image…"}</div>}
       </div>
 
       <div className="camera-upload-actions">
@@ -157,21 +218,32 @@ export default function CameraPage({ gps }) {
           onChange={selectImage}
           aria-label="Choose a road image"
         />
-        <button type="button" className="secondary-button" onClick={() => fileInputRef.current?.click()}>
-          <Upload size={16} /> {selectedImage ? "Choose Another Image" : "Upload Image"}
+        <button type="button" className="secondary-button" onClick={() => fileInputRef.current?.click()} disabled={capturing || analyzing}>
+          <Upload size={16} /> Upload Image
         </button>
-        <button type="button" className="primary-button" onClick={analyzeRoad} disabled={analyzing || !selectedImage}>
-          <Camera size={16} /> {analyzing ? "Analyzing…" : "Capture & Analyze"}
+        {imageSource === "upload" && selectedImage && (
+          <div className="camera-upload-filename" title={selectedImage.name}>
+            <span>{selectedImage.name}</span>
+            <button type="button" onClick={removeImage} aria-label="Remove uploaded image" title="Remove image"><X size={16} /></button>
+          </div>
+        )}
+        <button type="button" className="secondary-button camera-capture-button" onClick={captureImage} disabled={capturing || analyzing}>
+          <Camera size={16} /> {capturing ? "Capturing…" : "Capture Image"}
         </button>
-        <button type="button" className="secondary-button camera-remove-button" onClick={removeImage} disabled={!selectedImage}>
-          Remove
+        {imageSource === "capture" && selectedImage && (
+          <button type="button" className="secondary-button camera-remove-button" onClick={removeImage} disabled={capturing || analyzing}>
+            Remove
+          </button>
+        )}
+        <button type="button" className="primary-button" onClick={analyzeRoad} disabled={analyzing || capturing || !selectedImage}>
+          <BrainCircuit size={16} /> {analyzing ? "Analyzing…" : "Analyze"}
         </button>
       </div>
 
       <div className="tile-grid three camera-status-grid">
-        <StatTile label="Analysis Source" value="Uploaded Image" unit="" icon={<Video size={16} />} />
+        <StatTile label="Analysis Source" value={imageSource === "capture" ? "Camera Capture" : imageSource === "upload" ? "Uploaded Image" : "Waiting"} unit="" icon={<Video size={16} />} />
         <StatTile label="AI Model" value="Ready" unit="" icon={<BrainCircuit size={16} />} />
-        <StatTile label="Image Status" value={analysis ? "Analyzed" : selectedImage ? "Selected" : "Waiting"} unit="" icon={<Upload size={16} />} />
+        <StatTile label="Image Status" value={analyzing ? "Analyzing" : capturing ? "Capturing" : analysis ? "Analyzed" : selectedImage ? "Selected" : "Waiting"} unit="" icon={<Upload size={16} />} />
       </div>
 
       {error && <div className="camera-error" role="alert"><strong>Analysis Error</strong><span>{error}</span></div>}

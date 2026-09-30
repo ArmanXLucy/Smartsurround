@@ -117,6 +117,12 @@ function AccountPanel({ currentUser, section, onClose, onUserUpdated, onAppearan
   const [helpMessage, setHelpMessage] = React.useState({ type: "", text: "" });
   const [lastTicket, setLastTicket] = React.useState("");
   const [savingSettings, setSavingSettings] = React.useState(false);
+  const complaintAttachmentInputRef = React.useRef(null);
+
+  const clearComplaintAttachment = () => {
+    setAttachment(null);
+    if (complaintAttachmentInputRef.current) complaintAttachmentInputRef.current.value = "";
+  };
 
   React.useEffect(() => {
     setActiveSection(section || "profile");
@@ -317,9 +323,7 @@ function AccountPanel({ currentUser, section, onClose, onUserUpdated, onAppearan
       const ticket = result.complaint?.ticket_id || "";
       setLastTicket(ticket);
       setComplaintForm({ subject: "", description: "", priority: "Normal" });
-      setAttachment(null);
-      const fileInput = document.getElementById("account-help-attachment");
-      if (fileInput) fileInput.value = "";
+      clearComplaintAttachment();
       setHelpMessage({ type: "success", text: ticket ? `Complaint submitted successfully. Ticket ${ticket} has been created.` : "Complaint submitted successfully." });
       await loadComplaints();
     } catch (err) {
@@ -453,7 +457,16 @@ function AccountPanel({ currentUser, section, onClose, onUserUpdated, onAppearan
                   <label><span>Detailed Description</span><textarea maxLength={8000} rows={6} value={complaintForm.description} onChange={(e) => setComplaintForm((f) => ({ ...f, description: e.target.value }))} placeholder="Describe the issue clearly..." /></label>
                   <div className="account-form-grid compact">
                     <label><span>Priority</span><select value={complaintForm.priority} onChange={(e) => setComplaintForm((f) => ({ ...f, priority: e.target.value }))}><option>Normal</option><option>Intermediate</option><option>Urgent</option></select></label>
-                    <label><span>Attachment <em>optional</em></span><div className="account-file-input"><Paperclip size={15} /><input id="account-help-attachment" type="file" accept="image/*,.pdf,.txt" onChange={(e) => setAttachment(e.target.files?.[0] || null)} /><span>{attachment?.name || "Choose file"}</span></div></label>
+                    <div className="account-attachment-field">
+                      <span className="account-attachment-label">Attachment <em>optional</em></span>
+                      <div className="account-file-input">
+                        <input ref={complaintAttachmentInputRef} id="account-help-attachment" className="account-file-native" type="file" accept="image/*,.pdf,.txt" onChange={(e) => setAttachment(e.target.files?.[0] || null)} />
+                        <button type="button" className="account-file-name" onClick={() => complaintAttachmentInputRef.current?.click()} title={attachment?.name || "Choose File"}>
+                          <Paperclip size={15} /><span>{attachment?.name || "Choose File"}</span>
+                        </button>
+                        {attachment && <button type="button" className="account-file-remove" onClick={clearComplaintAttachment} aria-label="Remove selected attachment" title="Remove attachment"><X size={16} /></button>}
+                      </div>
+                    </div>
                   </div>
                   <button type="submit" className="primary-button" disabled={submittingComplaint}><Send size={15} /> {submittingComplaint ? "Submitting..." : "Submit Complaint"}</button>
                 </form>

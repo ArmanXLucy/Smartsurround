@@ -619,17 +619,24 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
           </button>
         ))}
 
-        {/* <div className="sidebar-title second-title">SYSTEM</div> */}
+        <div className="sidebar-title second-title">SYSTEM</div>
+        <button
+          type="button"
+          className={"side-link" + (activePage === "account-settings" ? " active" : "")}
+          onClick={() => {
+            setAccountPanelOpen(false);
+            navigate(dashboardPathFor("account-settings"));
+            setMenuOpen(false);
+          }}
+        >
+          <Settings size={15} />
+          Settings
+        </button>
 
-        <div className="sidebar-footer-card">
-          <div className="sidebar-footer-icon">
-            <Sparkles size={16} />
-          </div>
-          <div>
-            <span>AI Intelligence</span>
-            <strong>Enabled</strong>
-          </div>
-        </div>
+        <button type="button" className="sidebar-footer-logout" onClick={() => setLogoutConfirmOpen(true)}>
+          <LogOut size={16} />
+          <span>Logout</span>
+        </button>
 
       </aside>
 
@@ -730,7 +737,7 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
 
           {!isAccountPage && activePage === "environment" && <EnvironmentPage latest={latest} />}
 
-          {!isAccountPage && activePage === "camera" && <CameraPage gps={gps} />}
+          {!isAccountPage && activePage === "camera" && <CameraPage gps={gps} camIp={camIp} />}
 
           {!isAccountPage && activePage === "location" && <LocationPage gps={gps} />}
 
