@@ -394,8 +394,8 @@ function AccountPanel({ currentUser, section, onClose, onUserUpdated, onAppearan
           </button>
         </div>
 
-        <div className={`account-panel-body${activeSection === "help" ? " account-panel-body-help" : ""}`}>
-          {activeSection !== "help" && (
+        <div className={`account-panel-body${activeSection === "help" ? " account-panel-body-help" : ""}${activeSection === "settings" ? " account-panel-body-settings" : ""}`}>
+          {activeSection === "profile" && (
             <aside className="account-panel-nav account-panel-nav-settings-only">
               <button className={activeSection === "settings" ? "active" : ""} onClick={() => setActiveSection("settings")} type="button">
                 <Settings size={17} /> Settings

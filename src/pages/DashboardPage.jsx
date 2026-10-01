@@ -467,6 +467,92 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
 
     return () => unsubscribe();
   }, []);
+
+  // Read directly from the main ESP32 as well. This is needed when the
+  // dashboard is running on the same LAN but the board cannot reach Firebase
+  // (and also makes the IP field above actually functional).
+  React.useEffect(() => {
+    if (!esp32Ip) return undefined;
+
+    const baseUrl = /^https?:\/\//i.test(esp32Ip)
+      ? esp32Ip.replace(/\/+$/, "")
+      : `http://${esp32Ip.replace(/\/+$/, "")}`;
+    let stopped = false;
+
+    const toNumberOrNull = (value) => {
+      if (value === null || value === undefined || value === "") return null;
+      const number = Number(value);
+      return Number.isFinite(number) ? number : null;
+    };
+
+    const poll = async () => {
+      try {
+        const readingsResponse = await fetch(`${baseUrl}/api/readings`, { cache: "no-store" });
+        if (!readingsResponse.ok) throw new Error(`readings returned ${readingsResponse.status}`);
+        const readings = await readingsResponse.json();
+        if (stopped) return;
+
+        setLatest((previous) => ({
+          ...previous,
+          pm1: toNumberOrNull(readings.pm1),
+          pm25: toNumberOrNull(readings.pm25),
+          pm10: toNumberOrNull(readings.pm10),
+          temperature: toNumberOrNull(readings.temperature),
+          humidity: toNumberOrNull(readings.humidity),
+          iaq: toNumberOrNull(readings.iaq ?? readings.iaqScore),
+          co2: toNumberOrNull(readings.co2 ?? readings.co2Equivalent),
+          voc: toNumberOrNull(readings.voc ?? readings.vocEquivalent),
+          calibrating: Boolean(readings.calibrating),
+          iaqAccuracyText: readings.iaqAccuracyText ?? readings.iaqAccuracy ?? null,
+          ip: readings.ip ?? esp32Ip,
+          uptime: toNumberOrNull(readings.uptime),
+          status: readings.status ?? null,
+        }));
+
+        if (readings.camIp) setCamIp(String(readings.camIp));
+        if (readings.cameraOnline !== undefined) setCameraOnline(Boolean(readings.cameraOnline));
+
+        try {
+          const gpsResponse = await fetch(`${baseUrl}/api/gps`, { cache: "no-store" });
+          if (gpsResponse.ok) {
+            const gpsReading = await gpsResponse.json();
+            if (!stopped) {
+              setGps({
+                lat: toNumberOrNull(gpsReading.latitude ?? gpsReading.lat),
+                lng: toNumberOrNull(gpsReading.longitude ?? gpsReading.lng ?? gpsReading.lon),
+                alt: toNumberOrNull(gpsReading.altitude ?? gpsReading.alt),
+                speed: toNumberOrNull(gpsReading.speed),
+                course: toNumberOrNull(gpsReading.course),
+                sats: toNumberOrNull(gpsReading.satellites ?? gpsReading.sats),
+                hdop: toNumberOrNull(gpsReading.hdop),
+                fix: gpsReading.fix ?? null,
+                time: gpsReading.time ?? null,
+              });
+            }
+          }
+        } catch (gpsError) {
+          console.debug("ESP32 GPS unavailable:", gpsError);
+        }
+
+        lastFirebaseUpdate.current = Date.now();
+        setConnectionStatus("connected");
+      } catch (error) {
+        if (!stopped) {
+          console.debug("ESP32 readings unavailable:", error);
+          setConnectionStatus("error");
+        }
+      }
+    };
+
+    setConnectionStatus("connecting");
+    poll();
+    const interval = window.setInterval(poll, 5000);
+    return () => {
+      stopped = true;
+      window.clearInterval(interval);
+    };
+  }, [esp32Ip]);
+
   // =========================================================
   // ESP32 CONNECTION TIMEOUT
   // If Firebase stops receiving ESP32 updates for 15 seconds,
@@ -705,6 +791,28 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
         </div>
 
         <div className={`live-page-content${isAccountPage ? " live-page-content-account" : ""}`}>
+
+          {!isAccountPage && (
+            <form className="esp32-panel" onSubmit={handleConnect}>
+              <div className="esp32-panel-text">
+                <strong><Radio size={16} /> Connect main ESP32</strong>
+                <span>Enter the board IP shown in its Serial Monitor, for example 192.168.1.42.</span>
+              </div>
+              <div className="esp32-panel-controls">
+                <input
+                  type="text"
+                  value={esp32Input}
+                  onChange={(event) => setEsp32Input(event.target.value)}
+                  placeholder="192.168.1.42"
+                  aria-label="Main ESP32 IP address"
+                />
+                <button type="submit" className="primary-button small">Connect</button>
+                {esp32Ip && (
+                  <button type="button" className="secondary-button small" onClick={handleDisconnect}>Disconnect</button>
+                )}
+              </div>
+            </form>
+          )}
 
           {isAccountPage && (
             <AccountPanel
