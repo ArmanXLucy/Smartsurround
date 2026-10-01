@@ -4,15 +4,26 @@ import {
 } from "../lib/smartSurroundShared.jsx";
 
 import StatTile from "../components/StatTile.jsx";
+import NoticeBoard from "../components/NoticeBoard.jsx";
 
-export default function OverviewPage({ latest, alerts, connectionStatus }) {
+export default function OverviewPage({
+  latest,
+  alerts,
+  connectionStatus,
+  notices = [],
+  onClearAlerts = null,
+  clearedAlerts = false,
+}) {
+  const [confirmClearOpen, setConfirmClearOpen] = React.useState(false);
 
   const hasIaq = latest.iaq !== null && latest.iaq !== undefined;
   const iaq = hasIaq ? Number(latest.iaq) : 0;
   const gaugeDeg = hasIaq ? (clamp(iaq, 0, 500) / 500) * 360 : 0;
   const gaugeColor = hasIaq ? getIaqColor(iaq) : "#c9beb7";
   const pms = latest.pm25 !== null && latest.pm25 !== undefined ? pm25Status(Number(latest.pm25)) : null;
-  const currentAlerts = alerts.filter((alert) => ["warning", "danger"].includes(String(alert.level).toLowerCase()));
+
+  const rawAlerts = alerts.filter((alert) => ["warning", "danger"].includes(String(alert.level).toLowerCase()));
+  const currentAlerts = clearedAlerts ? [] : rawAlerts;
   const highestAlertLevel = currentAlerts.some((alert) => String(alert.level).toLowerCase() === "danger")
     ? "Danger"
     : currentAlerts.length ? "Warning" : "Normal";
@@ -63,7 +74,7 @@ export default function OverviewPage({ latest, alerts, connectionStatus }) {
             <p>
               {connectionStatus === "connected"
                 ? "Live IAQ reading from your connected sensors."
-                : "Connect your ESP32 below to see live readings here."}
+                : "Awaiting live sensor readings from connected device."}
             </p>
 
             <div
@@ -147,10 +158,23 @@ export default function OverviewPage({ latest, alerts, connectionStatus }) {
 
       </div>
 
+      {/* Current Alerts Section */}
       <section className="overview-alerts" aria-labelledby="overview-alerts-title">
         <div className="overview-alerts-heading">
-          <div><div className="small-label">SENSOR STATUS</div><h2 id="overview-alerts-title">Current Alerts</h2></div>
+          <div>
+            <div className="small-label">SENSOR STATUS</div>
+            <h2 id="overview-alerts-title">Current Alerts</h2>
+          </div>
           <div className="overview-alerts-status">
+            {currentAlerts.length > 0 && (
+              <button
+                type="button"
+                className="overview-alert-clear-btn"
+                onClick={() => setConfirmClearOpen(true)}
+              >
+                Clear
+              </button>
+            )}
             <Bell size={16} />
             <span className={`overview-alert-priority level-${highestAlertLevel.toLowerCase()}`}>
               {hasSensorReadings(latest) ? highestAlertLevel : "Waiting for data"}
@@ -170,28 +194,49 @@ export default function OverviewPage({ latest, alerts, connectionStatus }) {
         ) : (
           <div className="overview-alert-healthy">
             <ShieldCheck size={19} />
-            <span>{hasSensorReadings(latest)
-              ? (alerts.find((alert) => String(alert.level).toLowerCase() === "good")?.message || "Available readings are within configured limits.")
-              : "Waiting for sensor readings to confirm alert status."}</span>
+            <span>{clearedAlerts
+              ? "Current alerts cleared. Available readings remain monitored."
+              : hasSensorReadings(latest)
+                ? (alerts.find((alert) => String(alert.level).toLowerCase() === "good")?.message || "Available readings are within configured limits.")
+                : "Waiting for sensor readings to confirm alert status."}</span>
           </div>
         )}
       </section>
 
-      {/* <div className="event-row">
+      {/* Notice Board Section */}
+      <NoticeBoard notices={notices} />
 
-        {alerts.length === 0 ? (
-          <EventItem
-            icon={<span>📡</span>}
-            title="Waiting for ESP32"
-            text="Connect your board to start seeing live alerts."
-          />
-        ) : (
-          alerts.slice(0, 3).map((a, i) => (
-            <EventItem key={i} icon={<span>{a.icon}</span>} title={a.title} text={a.message} />
-          ))
-        )}
-
-      </div> */}
+      {/* Clear Alerts Confirmation Modal */}
+      {confirmClearOpen && (
+        <div className="account-confirm-backdrop" role="presentation" onClick={() => setConfirmClearOpen(false)}>
+          <div
+            className="account-confirm-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="clear-alerts-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="account-confirm-icon"><Trash2 size={20} /></div>
+            <h3 id="clear-alerts-title">Clear all current alerts?</h3>
+            <p>This will dismiss active alerts from the display. Sensor history will be preserved.</p>
+            <div className="account-confirm-actions">
+              <button type="button" className="secondary-button" onClick={() => setConfirmClearOpen(false)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => {
+                  setConfirmClearOpen(false);
+                  if (onClearAlerts) onClearAlerts();
+                }}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

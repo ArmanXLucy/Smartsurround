@@ -13,6 +13,13 @@ import {
   AdminIncidentReport, AdminReportGps, AdminExportPanel, AdminCommunicationsDrafts,
   AdminRecipients, AdminCommunicationHistory, AdminThresholds, AdminSystemSettings,
 } from "../components/AdminComponents.jsx";
+import NotificationDropdown from "../components/NotificationDropdown.jsx";
+import AdminNoticeManager from "../components/AdminNoticeManager.jsx";
+import {
+  subscribeToNotifications,
+  subscribeToNotices,
+  createNotification,
+} from "../lib/notificationService.js";
 
 export default function AdminPage({ onBackToSite, onBackToLogin, onLogout }) {
   const ADMIN_API = import.meta.env.VITE_BACKEND_URL || (import.meta.env.DEV ? "" : "");
@@ -58,6 +65,77 @@ export default function AdminPage({ onBackToSite, onBackToLogin, onLogout }) {
   const [selectedIncident, setSelectedIncident] = React.useState(null);
   const [notificationOpen, setNotificationOpen] = React.useState(false);
   const [profileOpen, setProfileOpen] = React.useState(false);
+  const [realtimeNotifications, setRealtimeNotifications] = React.useState([]);
+  const [notices, setNotices] = React.useState([]);
+  const prevCameraOnlineRef = React.useRef(null);
+  const prevDeviceConnectedRef = React.useRef(null);
+  const lastAdminAlertSentRef = React.useRef({});
+
+  // Subscribe to real-time notifications & notices for Admin
+  React.useEffect(() => {
+    const unsubNotifs = subscribeToNotifications({
+      userId: "admin",
+      isAdmin: true,
+      onUpdate: setRealtimeNotifications,
+    });
+    const unsubNotices = subscribeToNotices({
+      userId: "admin",
+      isAdmin: true,
+      onUpdate: setNotices,
+    });
+    return () => {
+      unsubNotifs();
+      unsubNotices();
+    };
+  }, []);
+
+  // Monitor camera online state transitions (ONLINE -> OFFLINE)
+  React.useEffect(() => {
+    if (!data?.live) return;
+    const now = Date.now();
+    const cameraOnline = Boolean(data.live.camera_online);
+    if (prevCameraOnlineRef.current === true && !cameraOnline) {
+      const lastSent = lastAdminAlertSentRef.current["cam_offline"] || 0;
+      if (now - lastSent > 120000) {
+        lastAdminAlertSentRef.current["cam_offline"] = now;
+        createNotification({
+          type: "camera",
+          title: "Camera Offline",
+          message: "ESP32-CAM video stream disconnected or frame reception timed out.",
+          severity: "warning",
+          recipientType: "admin",
+          createdAt: now,
+          soundType: "warning",
+        });
+      }
+    }
+    prevCameraOnlineRef.current = cameraOnline;
+  }, [data?.live?.camera_online]);
+
+  // Monitor ESP32 device online state transitions (ONLINE -> OFFLINE)
+  React.useEffect(() => {
+    if (!data?.devices) return;
+    const now = Date.now();
+    const esp32Device = data.devices.find((d) => d.device_type === "ESP32" || d.device_id?.includes("esp32") || d.device_id === "firebase-sensors");
+    const isConnected = esp32Device ? String(esp32Device.connection).toUpperCase() === "CONNECTED" : false;
+
+    if (prevDeviceConnectedRef.current === true && !isConnected) {
+      const lastSent = lastAdminAlertSentRef.current["esp_offline"] || 0;
+      if (now - lastSent > 120000) {
+        lastAdminAlertSentRef.current["esp_offline"] = now;
+        createNotification({
+          type: "device",
+          title: "ESP32 Device Offline",
+          message: "Sensor device is no longer communicating with the control center.",
+          severity: "warning",
+          recipientType: "admin",
+          createdAt: now,
+          soundType: "warning",
+        });
+      }
+    }
+    prevDeviceConnectedRef.current = isConnected;
+  }, [data?.devices]);
   const [userSearch, setUserSearch] = React.useState("");
   const [incidentFilter, setIncidentFilter] = React.useState("all");
   const [reportType, setReportType] = React.useState("incidents");
@@ -645,23 +723,18 @@ export default function AdminPage({ onBackToSite, onBackToLogin, onLogout }) {
           <div className="sc-admin-header-right">
             <div className="sc-admin-connection"><span className={backendStatus === "online" ? "on" : ""}></span>{backendStatus === "online" ? "CONNECTED" : "CONNECTING"}</div>
 
-            <div className="sc-admin-header-menu">
-              <button className="sc-admin-icon-button" onClick={() => { setNotificationOpen((v) => !v); setProfileOpen(false); }} aria-label="Notifications">
-                <Bell size={17} />
-                {notifications.length > 0 && <b>{notifications.length > 9 ? "9+" : notifications.length}</b>}
-              </button>
-              {notificationOpen && (
-                <div className="sc-admin-dropdown sc-admin-notifications">
-                  <div className="sc-admin-dropdown-title"><strong>Notifications</strong><span>{notifications.length} active</span></div>
-                  {notifications.length === 0 ? <AdminEmpty text="No active notifications." /> : notifications.map((n) => (
-                    <button key={n.id} onClick={n.action}>
-                      <span className={`sc-admin-notification-dot ${n.type}`}></span>
-                      <div><strong>{n.title}</strong><small>{n.text}</small></div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <NotificationDropdown
+              notifications={realtimeNotifications}
+              userId="admin"
+              isAdmin={true}
+              onNavigate={(ws) => {
+                setWorkspaceAndClose(ws);
+              }}
+              onOpenNotice={() => {
+                setWorkspaceAndClose("communications");
+                setTabs((t) => ({ ...t, communications: "notices" }));
+              }}
+            />
 
             <div className="sc-admin-header-menu">
               <button className="sc-admin-profile-button" onClick={() => { setProfileOpen((v) => !v); setNotificationOpen(false); }}>
@@ -849,8 +922,16 @@ export default function AdminPage({ onBackToSite, onBackToLogin, onLogout }) {
 
           {workspace === "communications" && (
             <div className="sc-admin-workspace">
-              <AdminWorkspaceHeader eyebrow="COMMUNICATIONS" title="Official communications" description="Create grounded drafts, review them, approve sending and maintain sent history." />
-              <AdminTabs items={[["drafts","AI DRAFTS"],["recipients","RECIPIENTS"],["history","SENT HISTORY"]]} active={tabs.communications} onChange={(v) => setTabs((t) => ({ ...t, communications: v }))} />
+              <AdminWorkspaceHeader eyebrow="COMMUNICATIONS" title="Official communications & notices" description="Create grounded drafts, notice board announcements, and maintain sent history." />
+              <AdminTabs items={[
+                ["notices", "NOTICE BOARD"],
+                ["drafts", "AI DRAFTS"],
+                ["recipients", "RECIPIENTS"],
+                ["history", "SENT HISTORY"]
+              ]} active={tabs.communications} onChange={(v) => setTabs((t) => ({ ...t, communications: v }))} />
+              {tabs.communications === "notices" && (
+                <AdminNoticeManager notices={notices} users={data.users || []} />
+              )}
               {tabs.communications === "drafts" && <AdminCommunicationsDrafts complaints={complaints} detections={detections} draftForm={draftForm} setDraftForm={setDraftForm} recipients={data.recipients || []} onGenerate={generateDraft} onSave={saveDraft} onSend={sendDraft} busy={draftSaving} />}
               {tabs.communications === "recipients" && <AdminRecipients recipients={data.recipients || []} form={recipientForm} setForm={setRecipientForm} onAdd={addRecipient} onDelete={deleteRecipient} />}
               {tabs.communications === "history" && <AdminCommunicationHistory rows={data.communications || []} />}

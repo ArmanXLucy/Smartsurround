@@ -11,8 +11,15 @@ import AirQualityPage from "./AirQualityPage.jsx";
 import EnvironmentPage from "./EnvironmentPage.jsx";
 import CameraPage from "./CameraPage.jsx";
 import LocationPage from "./LocationPage.jsx";
-import DataLogPage from "./DataLogPage.jsx";
 import AlertsPage from "./AlertsPage.jsx";
+import NotificationDropdown from "../components/NotificationDropdown.jsx";
+import {
+  subscribeToNotifications,
+  subscribeToNotices,
+  createNotification,
+  getClearedAlertsState,
+  saveClearedAlertsState,
+} from "../lib/notificationService.js";
 
 export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, onUserUpdated }) {
 
@@ -143,6 +150,41 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
   React.useEffect(() => {
     latestRef.current = latest;
   }, [latest]);
+
+  const [notifications, setNotifications] = React.useState([]);
+  const [notices, setNotices] = React.useState([]);
+  const [clearedAlerts, setClearedAlerts] = React.useState(false);
+  const lastAlertsSentRef = React.useRef({});
+  const prevConnectionStatusRef = React.useRef(connectionStatus);
+
+  // Subscribe to real-time notifications for current user
+  React.useEffect(() => {
+    if (!currentUser?.id) return;
+    const unsub = subscribeToNotifications({
+      userId: currentUser.id,
+      isAdmin: false,
+      onUpdate: setNotifications,
+    });
+    return () => unsub();
+  }, [currentUser?.id]);
+
+  // Subscribe to real-time notices for current user
+  React.useEffect(() => {
+    if (!currentUser?.id) return;
+    const unsub = subscribeToNotices({
+      userId: currentUser.id,
+      isAdmin: false,
+      onUpdate: setNotices,
+    });
+    return () => unsub();
+  }, [currentUser?.id]);
+
+  // Handle Clearing alerts from overview
+  const handleClearAlerts = () => {
+    const titles = alerts.map((a) => a.title);
+    saveClearedAlertsState(currentUser?.id, titles);
+    setClearedAlerts(true);
+  };
 
   // Share the real device GPS with the admin control center. This uses the
   // existing Firebase Auth identity and never asks the user to type a location.
@@ -632,6 +674,85 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
 
   const alerts = React.useMemo(() => buildAlerts(latest, alertSettings), [latest, alertSettings]);
 
+  // Debounced notification dispatch for critical sensor thresholds & safety
+  React.useEffect(() => {
+    if (!currentUser?.id) return;
+    const now = Date.now();
+    const activeAlerts = alerts.filter((a) => ["warning", "danger"].includes(String(a.level).toLowerCase()));
+
+    // Reset cleared status if a new alert condition arises
+    if (clearedAlerts && activeAlerts.length > 0) {
+      const clearedState = getClearedAlertsState(currentUser.id);
+      const hasUnseenAlert = activeAlerts.some((a) => !clearedState.clearedTitles?.includes(a.title));
+      if (hasUnseenAlert) {
+        setClearedAlerts(false);
+      }
+    }
+
+    activeAlerts.forEach((alert) => {
+      const key = `${alert.title}_${alert.level}`;
+      const lastSent = lastAlertsSentRef.current[key] || 0;
+      // 10-minute cooldown per specific sensor alert to prevent spamming
+      if (now - lastSent > 600000) {
+        lastAlertsSentRef.current[key] = now;
+        createNotification({
+          type: "alert",
+          title: alert.title,
+          message: alert.message,
+          severity: String(alert.level).toLowerCase(),
+          recipientType: "user",
+          recipientId: currentUser.id,
+          createdAt: now,
+          soundType: String(alert.level).toLowerCase() === "danger" ? "danger" : "warning",
+        });
+      }
+    });
+
+    // Fire detection if reported by live reading
+    if (latest.fire || latest.flame) {
+      const fireKey = "fire_detected";
+      const lastFire = lastAlertsSentRef.current[fireKey] || 0;
+      if (now - lastFire > 300000) {
+        lastAlertsSentRef.current[fireKey] = now;
+        createNotification({
+          type: "safety",
+          title: "🔥 Fire Detected",
+          message: "Fire sensor has detected a possible fire condition in the monitored environment.",
+          severity: "danger",
+          recipientType: "user",
+          recipientId: currentUser.id,
+          createdAt: now,
+          soundType: "danger",
+        });
+      }
+    }
+  }, [alerts, latest.fire, latest.flame, currentUser?.id, clearedAlerts]);
+
+  // Connection state transition notification (ONLINE -> OFFLINE)
+  React.useEffect(() => {
+    if (!currentUser?.id) return;
+    const prev = prevConnectionStatusRef.current;
+    prevConnectionStatusRef.current = connectionStatus;
+
+    if (prev === "connected" && (connectionStatus === "disconnected" || connectionStatus === "error")) {
+      const now = Date.now();
+      const lastSent = lastAlertsSentRef.current["device_offline"] || 0;
+      if (now - lastSent > 120000) {
+        lastAlertsSentRef.current["device_offline"] = now;
+        createNotification({
+          type: "device",
+          title: "ESP32 Device Offline",
+          message: "The main ESP32 device stopped transmitting sensor telemetry.",
+          severity: "warning",
+          recipientType: "user",
+          recipientId: currentUser.id,
+          createdAt: now,
+          soundType: "warning",
+        });
+      }
+    }
+  }, [connectionStatus, currentUser?.id]);
+
   function exportLogExcel() {
 
     let html =
@@ -750,6 +871,13 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
               {statusLabel}
             </div>
 
+            <NotificationDropdown
+              notifications={notifications}
+              userId={currentUser?.id}
+              isAdmin={false}
+              onNavigate={(page) => navigate(dashboardPathFor(page))}
+            />
+
             <div className="live-account-wrap" ref={accountAreaRef}>
               <button
                 type="button"
@@ -792,28 +920,6 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
 
         <div className={`live-page-content${isAccountPage ? " live-page-content-account" : ""}`}>
 
-          {!isAccountPage && (
-            <form className="esp32-panel" onSubmit={handleConnect}>
-              <div className="esp32-panel-text">
-                <strong><Radio size={16} /> Connect main ESP32</strong>
-                <span>Enter the board IP shown in its Serial Monitor, for example 192.168.1.42.</span>
-              </div>
-              <div className="esp32-panel-controls">
-                <input
-                  type="text"
-                  value={esp32Input}
-                  onChange={(event) => setEsp32Input(event.target.value)}
-                  placeholder="192.168.1.42"
-                  aria-label="Main ESP32 IP address"
-                />
-                <button type="submit" className="primary-button small">Connect</button>
-                {esp32Ip && (
-                  <button type="button" className="secondary-button small" onClick={handleDisconnect}>Disconnect</button>
-                )}
-              </div>
-            </form>
-          )}
-
           {isAccountPage && (
             <AccountPanel
               currentUser={currentUser}
@@ -836,7 +942,14 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
           )}
 
           {!isAccountPage && activePage === "overview" && (
-            <OverviewPage latest={latest} alerts={alerts} connectionStatus={connectionStatus} />
+            <OverviewPage
+              latest={latest}
+              alerts={alerts}
+              connectionStatus={connectionStatus}
+              notices={notices}
+              onClearAlerts={handleClearAlerts}
+              clearedAlerts={clearedAlerts}
+            />
           )}
 
           {!isAccountPage && activePage === "airquality" && (
