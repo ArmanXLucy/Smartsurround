@@ -229,8 +229,86 @@ function AdminAirQuality({ live, iaqValue, iaqStatus, thresholds }) {
 }
 
 function AdminCameras({ live }) {
-  return <AdminPanel title="Authorized Cameras" subtitle="No camera is marked live unless an actual status is received from the backend."><div className="sc-admin-camera-grid"><div className="sc-admin-camera"><div className="sc-admin-camera-status"><span></span>{live?.camera_online ? "CONNECTED" : "CAMERA OFFLINE"}</div><Camera size={34}/><strong>{live?.camera_online ? "Authorized camera" : "No live camera feed"}</strong><small>{live?.camera_ip ? `Camera IP: ${live.camera_ip}` : "No authorized camera feed is configured."}</small>{live?.camera_online && <button className="secondary-button small" type="button" onClick={() => live?.camera_ip && window.open(`http://${live.camera_ip}`, "_blank", "noopener,noreferrer")}>Open camera</button>}</div></div></AdminPanel>;
+  const ADMIN_API = import.meta.env.VITE_BACKEND_URL || (import.meta.env.DEV ? "" : "");
+  const token = (() => {
+    try { return sessionStorage.getItem("ss_admin_token") || ""; } catch (_) { return ""; }
+  })();
+
+  // Local camera status — updated by polling /api/camera/status every 5 s.
+  // Falls back to the control-center live.camera_online until first poll responds.
+  const [cameraOnline, setCameraOnline] = React.useState(!!live?.camera_online);
+  const [streamError, setStreamError] = React.useState(false);
+  const [imgKey, setImgKey] = React.useState(0); // bump to force img reload on reconnect
+
+  React.useEffect(() => {
+    // Sync with control-center data immediately when it changes
+    setCameraOnline(!!live?.camera_online);
+  }, [live?.camera_online]);
+
+  React.useEffect(() => {
+    if (!ADMIN_API && !import.meta.env.DEV) return;
+    let active = true;
+    const poll = async () => {
+      try {
+        const res = await fetch(`${ADMIN_API}/api/camera/status`, {
+          headers: token ? { "X-Auth-Token": token } : {},
+          credentials: "include",
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!active) return;
+        const wasOnline = cameraOnline;
+        const nowOnline = !!data.online;
+        setCameraOnline(nowOnline);
+        // If camera came back online after a stream error, reload the img
+        if (nowOnline && !wasOnline && streamError) {
+          setStreamError(false);
+          setImgKey((k) => k + 1);
+        }
+      } catch (_) {
+        // Network error — keep current state; don't flip to offline on a single failure
+      }
+    };
+    poll();
+    const interval = window.setInterval(poll, 5000);
+    return () => { active = false; window.clearInterval(interval); };
+  }, [ADMIN_API, token]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleStreamError = () => {
+    setStreamError(true);
+    setCameraOnline(false);
+  };
+
+  return (
+    <AdminPanel title="Authorized Cameras" subtitle="Live MJPEG video stream from the ESP32-CAM via Render backend.">
+      <div className="sc-admin-camera-grid" style={{ display: "flex", justifyContent: "center" }}>
+        <div className="sc-admin-camera" style={{ width: "100%", maxWidth: "800px" }}>
+          <div className="sc-admin-camera-status">
+            <span style={cameraOnline && !streamError ? { backgroundColor: "#10b981" } : { backgroundColor: "#ef4444" }}></span>
+            {cameraOnline && !streamError ? "CAMERA LIVE" : "CAMERA OFFLINE"}
+          </div>
+          <div style={{ marginTop: "1rem", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--sc-border)", backgroundColor: "#000", aspectRatio: "4/3", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {cameraOnline && !streamError ? (
+              <img
+                key={imgKey}
+                src={`${ADMIN_API}/api/camera/stream/live?token=${encodeURIComponent(token)}`}
+                alt="Live Camera Feed"
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                onError={handleStreamError}
+              />
+            ) : null}
+            <div style={{ display: cameraOnline && !streamError ? "none" : "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", color: "var(--sc-muted)" }}>
+              <Video size={48} />
+              <span>{streamError ? "Camera Stream Error" : "No live camera feed"}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </AdminPanel>
+  );
 }
+
 
 function AdminSensors({ devices }) {
   return <AdminPanel title="ESP32 / sensor devices" subtitle={`${devices.length} registered device records`}><div className="sc-admin-table-wrap"><table className="sc-admin-table"><thead><tr><th>Device ID</th><th>Device Type</th><th>Assigned User</th><th>Connection</th><th>Last Update</th><th>Sensors</th><th>Battery</th></tr></thead><tbody>{devices.map((d) => <tr key={d.device_id}><td className="mono">{d.device_id}</td><td>{d.device_type || "ESP32"}</td><td>{d.assigned_user_id || "--"}</td><td><AdminStatus value={d.connection}/></td><td>{formatAdminTime(d.last_update)}</td><td>{d.sensor_availability || "No data"}</td><td>{d.battery != null ? `${d.battery}%` : "--"}</td></tr>)}{devices.length===0 && <tr><td colSpan="7"><AdminEmpty text="No sensor devices have synchronized yet." /></td></tr>}</tbody></table></div></AdminPanel>;
