@@ -1,4 +1,5 @@
 import React from "react";
+import { uploadToSupabase } from "../supabaseClient";
 import {
   ArrowRight, ArrowUpRight, Check, ChevronDown, Menu, X, Sparkles, ShieldCheck, MapPin, Camera, Activity, CloudRain, Flame, Mic, Wind, BrainCircuit, User, Lock, Mail, LogOut, Eye, EyeOff, Thermometer, Droplets, Gauge, Satellite, Video, Table, Bell, Download, Play, Pause, Trash2, RotateCcw, Compass, Navigation, Save, Radio, FileText, Maximize2, Minimize2, AlertTriangle, Settings, HelpCircle, Upload, Paperclip, MessageSquare, Moon, Sun, Monitor, CheckCircle2, Clock3, Send, UserRound, motion, useAnimation, useInView, AnimatePresence, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, fetchSignInMethodsForEmail, onAuthStateChanged, signOut, updateProfile, reload, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateEmail, onValue, ref, getStorage, storageRef, uploadBytes, getDownloadURL, firebaseApp, db, firebaseAuth, firebaseStorage, BACKEND_URL, BACKEND_DISPLAY_URL, EMPTY_READING, EMPTY_GPS, NAV_ITEMS, DEFAULT_ALERT_SETTINGS, pm25Status, statusClass, getIaqColor, clamp, fmt, yVal, buildPath, buildAlerts, accountStorageKey, readAccountSettings, readLocalAvatar, saveLocalAvatar, formatAdminTime
 } from "../lib/smartSurroundShared.jsx";
@@ -222,12 +223,9 @@ function AccountPanel({ currentUser, section, onClose, onUserUpdated, onAppearan
       let avatarStorageFallback = false;
       if (avatarFile) {
         try {
-          const ext = avatarFile.name.split(".").pop()?.toLowerCase() || "jpg";
-          const avatarRef = storageRef(firebaseStorage, `profile-avatars/${authUser.uid}/${Date.now()}.${ext}`);
-          const uploaded = await uploadBytes(avatarRef, avatarFile, { contentType: avatarFile.type });
-          photoURL = await getDownloadURL(uploaded.ref);
+          photoURL = await uploadToSupabase(avatarFile);
         } catch {
-          // Keep the profile usable even if Firebase Storage rules are not enabled yet.
+          // Keep the profile usable even if Supabase Storage has an issue.
           const fallbackReader = new FileReader();
           localAvatarValue = String(await new Promise((resolve, reject) => {
             fallbackReader.onload = () => resolve(String(fallbackReader.result || ""));
@@ -256,7 +254,7 @@ function AccountPanel({ currentUser, section, onClose, onUserUpdated, onAppearan
       setProfileMessage({
         type: "success",
         text: avatarStorageFallback
-          ? "Profile saved. Avatar is stored locally because Firebase Storage is not currently available."
+          ? "Profile saved. Avatar is stored locally because Supabase Storage is not currently available."
           : "Profile updated successfully.",
       });
     } catch (err) {
