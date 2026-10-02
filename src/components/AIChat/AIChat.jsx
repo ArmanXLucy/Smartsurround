@@ -165,7 +165,7 @@ export default function AIChat() {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "Hello! I'm SmartSurround AI. How can I help you?",
+      content: "Hello! I'm SmartSurround AI. How can I help you?Besi message korbi na keu limit sesh hoye jabe",
     },
   ]);
   const [loading, setLoading] = useState(false);
