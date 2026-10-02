@@ -12,6 +12,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@gradio/client": "^2.7.1",
     "@supabase/supabase-js": "^2.112.4",
     "firebase": "^12.18.0",
     "framer-motion": "^13.1.1",

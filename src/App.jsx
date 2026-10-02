@@ -11,6 +11,7 @@ import LandingPage from "./pages/LandingPage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
+import AIChat from "./components/AIChat/AIChat.jsx";
 
 import "./index.css";
 
@@ -272,6 +273,7 @@ export default function App() {
   return (
     <Router>
       <AppRouter />
+      <AIChat />
     </Router>
   );
 }
