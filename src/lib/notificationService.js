@@ -2,7 +2,7 @@
  * notificationService.js
  * -----------------------
  * Shared notification and notice board subsystem for SmartSurround.
- * Backed by Firebase Realtime Database and Firebase Storage.
+ * Backed by Firebase Realtime Database and Supabase Storage (for images).
  *
  * Provides:
  * - Real-time notification synchronization for Users and Admins
@@ -24,12 +24,8 @@ import {
   get,
   child,
 } from "firebase/database";
-import {
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
-import { db, firebaseStorage } from "../firebaseClient";
+import { db } from "../firebaseClient";
+import { uploadToSupabase } from "../supabaseClient";
 
 // ---------------------------------------------------------------------------
 // 1. Web Audio API Sound Engine
@@ -382,35 +378,31 @@ export function subscribeToNotices({ userId, isAdmin = false, onUpdate }) {
 }
 
 /**
- * Upload an image file for a notice to Firebase Storage.
- * Falls back safely to Base64 data URL if storage rules restrict upload.
+ * Upload an image file for a notice to Supabase Storage.
+ * Falls back safely to Base64 data URL if the upload fails for any reason.
  */
 export async function uploadNoticeImage(file) {
   if (!file) return null;
 
-  // Validate file
+  // Validate file type
   const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
   if (!validTypes.includes(file.type)) {
     throw new Error("Invalid file type. Please upload a JPG, PNG, WEBP, or GIF image.");
   }
 
-  // 5MB limit
+  // 5 MB limit
   const maxBytes = 5 * 1024 * 1024;
   if (file.size > maxBytes) {
     throw new Error("Image file size exceeds the 5 MB limit.");
   }
 
-  const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const path = `notice-images/${Date.now()}_${cleanName}`;
-
   try {
-    const fileRef = storageRef(firebaseStorage, path);
-    await uploadBytes(fileRef, file);
-    const downloadUrl = await getDownloadURL(fileRef);
-    return downloadUrl;
+    // Upload to Supabase Storage bucket "notice-images"
+    const publicUrl = await uploadToSupabase(file);
+    return publicUrl;
   } catch (storageErr) {
-    console.warn("Firebase Storage upload fallback engaged:", storageErr);
-    // Fallback: Read as base64 data URL so notice publishing succeeds even if storage rules are locked
+    console.warn("Supabase Storage upload failed — using base64 fallback:", storageErr);
+    // Fallback: encode as base64 data URL so publishing still succeeds
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result);

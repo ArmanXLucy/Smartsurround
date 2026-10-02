@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
-import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -20,10 +19,6 @@ export const auth = getAuth(app);
 
 // Firebase Realtime Database
 export const db = getDatabase(app);
-
-// Firebase Storage
-export const storage = getStorage(app);
-export const firebaseStorage = storage;
 
 // Keep this name too, so your existing App.jsx
 // can use firebaseApp if needed.
