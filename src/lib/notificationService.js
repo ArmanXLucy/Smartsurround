@@ -22,7 +22,6 @@ import {
   remove,
   onValue,
   get,
-  child,
 } from "firebase/database";
 import { db } from "../firebaseClient";
 import { uploadToSupabase } from "../supabaseClient";
@@ -74,7 +73,9 @@ export function isSoundEnabled() {
 export function setSoundEnabled(enabled) {
   try {
     localStorage.setItem("smartsurround_sound_enabled", String(enabled));
-  } catch {}
+  } catch {
+    // Browser storage may be unavailable in private or restricted contexts.
+  }
 }
 
 export function playNotificationSound(severityOrType = "info") {
@@ -150,80 +151,155 @@ export function playNotificationSound(severityOrType = "info") {
   }
 }
 
-// ---------------------------------------------------------------------------
-// 2. Realtime Notifications Subscription
-// ---------------------------------------------------------------------------
+const NOTIFICATIONS_CLEARED_STORAGE_KEY = "smartsurround_cleared_notifications";
+
+export function getClearedNotificationsState(userId = "guest") {
+  try {
+    const raw = localStorage.getItem(`${NOTIFICATIONS_CLEARED_STORAGE_KEY}_${userId}`);
+    if (!raw) return { clearedAt: 0, clearedIds: [] };
+    return JSON.parse(raw);
+  } catch {
+    return { clearedAt: 0, clearedIds: [] };
+  }
+}
+
+export function saveClearedNotificationsState(userId = "guest", ids = []) {
+  try {
+    const existing = getClearedNotificationsState(userId);
+    const set = new Set([...(existing.clearedIds || []), ...ids]);
+    const state = {
+      clearedAt: Date.now(),
+      clearedIds: Array.from(set),
+    };
+    localStorage.setItem(
+      `${NOTIFICATIONS_CLEARED_STORAGE_KEY}_${userId}`,
+      JSON.stringify(state)
+    );
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("smartsurround_notifications_cleared", { detail: { userId, state } }));
+    }
+    return state;
+  } catch {
+    return { clearedAt: Date.now(), clearedIds: ids };
+  }
+}
+
+export async function clearAllNotificationsForUser(notifications, userId = "guest") {
+  const ids = Array.isArray(notifications) ? notifications.map((n) => n.id) : [];
+  const state = saveClearedNotificationsState(userId, ids);
+  try {
+    // Keep shared event records intact while recording a per-user clear marker
+    // on each visible item. This uses the existing notification write model.
+    const updates = {};
+    ids.forEach((id) => {
+      updates[`notifications/${id}/clearedBy/${userId}`] = true;
+    });
+    updates[`notificationState/${userId}`] = state;
+    if (Object.keys(updates).length > 0) await update(ref(db), updates);
+  } catch (err) {
+    // Local state remains a safe fallback when an older Firebase ruleset does
+    // not yet include the per-user notificationState path.
+    console.warn("Unable to sync notification clear state:", err);
+  }
+}
 
 /**
  * Subscribe to notifications in Firebase Realtime Database.
  * Accurately filters based on recipient role (user vs admin), handles
- * read status per user, and triggers audio only for genuinely NEW incoming items.
+ * read status per user, respects per-user cleared state, and triggers audio only for genuinely NEW incoming items.
  */
 export function subscribeToNotifications({ userId, isAdmin = false, onUpdate }) {
   const notifRef = ref(db, "notifications");
+  const effectiveUserId = userId || (isAdmin ? "admin" : "guest");
   let isInitialLoad = true;
   const processedIds = new Set();
+  let latestRawSnapshot = {};
+  let latestClearedState = getClearedNotificationsState(effectiveUserId);
+
+  const processAndEmit = (data) => {
+    const clearedState = latestClearedState;
+    const clearedIdsSet = new Set(clearedState.clearedIds || []);
+    const clearedAt = Number(clearedState.clearedAt) || 0;
+
+    const list = [];
+
+    Object.entries(data || {}).forEach(([key, value]) => {
+      if (!value || typeof value !== "object") return;
+      const id = value.id || key;
+
+      // Check if this item was cleared by this user
+      if (clearedIdsSet.has(id)) return;
+      if (clearedAt > 0 && Number(value.createdAt || 0) <= clearedAt) return;
+      if (value.clearedBy && value.clearedBy[effectiveUserId]) return;
+
+      // Role & User targeting filter
+      let isForMe = false;
+      if (isAdmin) {
+        // Admin receives admin-directed notifications and broadcast notices
+        if (value.recipientType === "admin" || value.recipientType === "all") {
+          isForMe = true;
+        }
+      } else if (userId) {
+        // User receives notices for all, or items directly targeted to them
+        if (value.recipientType === "all") {
+          isForMe = true;
+        } else if (value.recipientType === "user") {
+          if (value.recipientId === userId) {
+            isForMe = true;
+          } else if (Array.isArray(value.recipientIds) && value.recipientIds.includes(userId)) {
+            isForMe = true;
+          }
+        }
+      }
+
+      if (!isForMe) return;
+
+      // Compute read state for this specific user/admin
+      const isRead =
+        Boolean(value.read) ||
+        Boolean(value.readBy && (userId ? value.readBy[userId] : value.readBy["admin"]));
+
+      list.push({
+        ...value,
+        id,
+        read: isRead,
+      });
+    });
+
+    // Sort newest first
+    list.sort((a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0));
+
+    // Handle sound for genuinely NEW items arriving after initial load
+    if (!isInitialLoad) {
+      list.forEach((item) => {
+        if (!processedIds.has(item.id) && !item.read) {
+          playNotificationSound(item.soundType || item.severity || "info");
+        }
+      });
+    }
+
+    list.forEach((item) => processedIds.add(item.id));
+    isInitialLoad = false;
+
+    onUpdate(list);
+  };
+
+  const handleClearedEvent = (e) => {
+    if (e.detail?.userId === effectiveUserId) {
+      latestClearedState = e.detail.state || getClearedNotificationsState(effectiveUserId);
+      processAndEmit(latestRawSnapshot);
+    }
+  };
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("smartsurround_notifications_cleared", handleClearedEvent);
+  }
 
   const unsubscribe = onValue(
     notifRef,
     (snapshot) => {
-      const data = snapshot.val() || {};
-      const list = [];
-
-      Object.entries(data).forEach(([key, value]) => {
-        if (!value || typeof value !== "object") return;
-        const id = value.id || key;
-
-        // Role & User targeting filter
-        let isForMe = false;
-        if (isAdmin) {
-          // Admin receives admin-directed notifications and broadcast notices
-          if (value.recipientType === "admin" || value.recipientType === "all") {
-            isForMe = true;
-          }
-        } else if (userId) {
-          // User receives notices for all, or items directly targeted to them
-          if (value.recipientType === "all") {
-            isForMe = true;
-          } else if (value.recipientType === "user") {
-            if (value.recipientId === userId) {
-              isForMe = true;
-            } else if (Array.isArray(value.recipientIds) && value.recipientIds.includes(userId)) {
-              isForMe = true;
-            }
-          }
-        }
-
-        if (!isForMe) return;
-
-        // Compute read state for this specific user/admin
-        const isRead =
-          Boolean(value.read) ||
-          Boolean(value.readBy && (userId ? value.readBy[userId] : value.readBy["admin"]));
-
-        list.push({
-          ...value,
-          id,
-          read: isRead,
-        });
-      });
-
-      // Sort newest first
-      list.sort((a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0));
-
-      // Handle sound for genuinely NEW items arriving after initial load
-      if (!isInitialLoad) {
-        list.forEach((item) => {
-          if (!processedIds.has(item.id) && !item.read) {
-            playNotificationSound(item.soundType || item.severity || "info");
-          }
-        });
-      }
-
-      list.forEach((item) => processedIds.add(item.id));
-      isInitialLoad = false;
-
-      onUpdate(list);
+      latestRawSnapshot = snapshot.val() || {};
+      processAndEmit(latestRawSnapshot);
     },
     (err) => {
       console.warn("Notifications listener warning:", err);
@@ -231,7 +307,24 @@ export function subscribeToNotifications({ userId, isAdmin = false, onUpdate }) 
     }
   );
 
-  return unsubscribe;
+  const unsubscribeClearedState = onValue(
+    ref(db, `notificationState/${effectiveUserId}`),
+    (snapshot) => {
+      latestClearedState = snapshot.val() || getClearedNotificationsState(effectiveUserId);
+      processAndEmit(latestRawSnapshot);
+    },
+    () => {
+      // Local storage remains the fallback for projects with older rules.
+    }
+  );
+
+  return () => {
+    if (typeof window !== "undefined") {
+      window.removeEventListener("smartsurround_notifications_cleared", handleClearedEvent);
+    }
+    unsubscribe();
+    unsubscribeClearedState();
+  };
 }
 
 /**

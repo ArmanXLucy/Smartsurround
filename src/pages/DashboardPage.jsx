@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  ArrowRight, ArrowUpRight, Check, ChevronDown, Menu, X, Sparkles, ShieldCheck, MapPin, Camera, Activity, CloudRain, Flame, Mic, Wind, BrainCircuit, User, Lock, Mail, LogOut, Eye, EyeOff, Thermometer, Droplets, Gauge, Satellite, Video, Table, Bell, Download, Play, Pause, Trash2, RotateCcw, Compass, Navigation, Save, Radio, FileText, Maximize2, Minimize2, AlertTriangle, Settings, HelpCircle, Upload, Paperclip, MessageSquare, Moon, Sun, Monitor, CheckCircle2, Clock3, Send, UserRound, motion, useAnimation, useInView, AnimatePresence, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, fetchSignInMethodsForEmail, onAuthStateChanged, signOut, updateProfile, reload, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateEmail, onValue, ref, getStorage, storageRef, uploadBytes, getDownloadURL, firebaseApp, db, firebaseAuth, firebaseStorage, BACKEND_URL, BACKEND_DISPLAY_URL, EMPTY_READING, EMPTY_GPS, NAV_ITEMS, DEFAULT_ALERT_SETTINGS, pm25Status, statusClass, getIaqColor, clamp, fmt, yVal, buildPath, buildAlerts, accountStorageKey, readAccountSettings, readLocalAvatar, saveLocalAvatar, formatAdminTime
+  ArrowRight, ArrowUpRight, Check, ChevronDown, Menu, X, Sparkles, ShieldCheck, MapPin, Camera, Activity, CloudRain, Flame, Mic, Wind, BrainCircuit, User, Lock, Mail, LogOut, Eye, EyeOff, Thermometer, Droplets, Gauge, Satellite, Video, Table, Bell, Download, Play, Pause, Trash2, RotateCcw, Compass, Navigation, Save, Radio, FileText, Maximize2, Minimize2, AlertTriangle, Settings, HelpCircle, Upload, Paperclip, MessageSquare, Moon, Sun, Monitor, CheckCircle2, Clock3, Send, UserRound, motion, useAnimation, useInView, AnimatePresence, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, fetchSignInMethodsForEmail, onAuthStateChanged, signOut, updateProfile, reload, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateEmail, onValue, ref, getStorage, storageRef, uploadBytes, getDownloadURL, firebaseApp, db, firebaseAuth, firebaseStorage, BACKEND_URL, BACKEND_DISPLAY_URL, EMPTY_READING, EMPTY_GPS, NAV_ITEMS, DEFAULT_ALERT_SETTINGS, hasSensorReadings, pm25Status, statusClass, getIaqColor, clamp, fmt, yVal, buildPath, buildAlerts, accountStorageKey, readAccountSettings, readLocalAvatar, saveLocalAvatar, formatAdminTime
 } from "../lib/smartSurroundShared.jsx";
 
 import { useLocation, useNavigate } from "../router.jsx";
@@ -122,10 +122,13 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
     () => (typeof window !== "undefined" && window.localStorage.getItem("esp32Ip")) || ""
   );
   const [esp32Input, setEsp32Input] = React.useState(esp32Ip);
-  const [connectionStatus, setConnectionStatus] = React.useState(
-    esp32Ip ? "connecting" : "disconnected"
-  ); // "disconnected" | "connecting" | "connected" | "error"
-  const lastFirebaseUpdate = React.useRef(0);
+  const [connectionStatus, setConnectionStatus] = React.useState("disconnected");
+  // "disconnected" | "connecting" | "connected" | "error"
+
+  const lastTelemetryTimeRef = React.useRef(0);
+  const lastHeartbeatValueRef = React.useRef(null);
+  const isInitialFirebaseSnapshotRef = React.useRef(true);
+
   const [latest, setLatest] = React.useState(EMPTY_READING);
   const [gps, setGps] = React.useState(EMPTY_GPS);
   const [cameraOnline, setCameraOnline] = React.useState(false);
@@ -137,14 +140,43 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
   const [loggerInterval, setLoggerInterval] = React.useState(5000);
   const [exportName, setExportName] = React.useState("air_quality_log");
 
-  const [alertSettings, setAlertSettings] = React.useState(() => {
-    try {
-      const saved = JSON.parse(window.localStorage.getItem("smartsurround_alert_settings"));
-      return saved ? { ...DEFAULT_ALERT_SETTINGS, ...saved } : DEFAULT_ALERT_SETTINGS;
-    } catch (e) {
-      return DEFAULT_ALERT_SETTINGS;
-    }
-  });
+  // Admin System -> Thresholds is the single source of truth for alerts
+  const [alertSettings, setAlertSettings] = React.useState(DEFAULT_ALERT_SETTINGS);
+
+  // Sync configured thresholds from backend
+  React.useEffect(() => {
+    if (!currentUser?.id) return;
+    let cancelled = false;
+
+    const fetchThresholds = async () => {
+      const authUser = firebaseAuth.currentUser;
+      if (!authUser) return;
+      try {
+        const token = await authUser.getIdToken();
+        const res = await fetch(`${BACKEND_URL}/api/user/thresholds`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (!cancelled && data.ok && Array.isArray(data.thresholds)) {
+            setAlertSettings(data.thresholds);
+          }
+        }
+      } catch (err) {
+        console.debug("Thresholds sync unavailable:", err);
+      }
+    };
+
+    fetchThresholds();
+    const interval = window.setInterval(fetchThresholds, 30000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [currentUser?.id]);
 
   const latestRef = React.useRef(latest);
   React.useEffect(() => {
@@ -287,13 +319,14 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
     };
   }, [currentUser?.id, currentUser?.name, currentUser?.email]);
 
-  // Persist real sensor readings for the admin reports workspace. No reading
-  // is written until the Firebase dashboard has actually received a value.
+  // Persist real sensor readings for the admin reports workspace. Only submitted
+  // when ESP32 is actively connected with fresh telemetry.
   React.useEffect(() => {
     if (!currentUser?.id || typeof window === "undefined") return;
     const interval = window.setInterval(async () => {
+      if (connectionStatus !== "connected") return;
       const reading = latestRef.current;
-      if (!reading || Object.values(reading).every((v) => v === null || v === undefined || v === false || v === "")) return;
+      if (!reading || !hasSensorReadings(reading)) return;
       const authUser = firebaseAuth.currentUser;
       if (!authUser) return;
       try {
@@ -307,6 +340,7 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
           },
           body: JSON.stringify({
             ...reading,
+            is_connected: true,
             device_id: reading.ip || "firebase-sensors",
             timestamp: new Date().toISOString(),
           }),
@@ -317,7 +351,7 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
       }
     }, 15000);
     return () => window.clearInterval(interval);
-  }, [currentUser?.id]);
+  }, [currentUser?.id, connectionStatus]);
 
   function handleConnect(e) {
     e.preventDefault();
@@ -347,11 +381,8 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
   // =========================================================
   // FIREBASE REALTIME SENSOR DATA
   // ESP32 → Firebase Realtime Database → React dashboard
-  //
-  // Supports either of these Firebase layouts:
-  //   /sensors/{...}
-  //   /{temperature, humidity, pm25, ...}
-  // GPS may be stored as /gps or /sensors/gps.
+  // Heartbeat tracking: Initial snapshot on load/refresh does
+  // NOT mark connected. Only a CHANGED/FRESH heartbeat marks connected.
   // =========================================================
   React.useEffect(() => {
     const databaseRef = ref(db);
@@ -360,8 +391,6 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
       databaseRef,
       (snapshot) => {
         const root = snapshot.val();
-
-        lastFirebaseUpdate.current = Date.now();
 
         if (!root || typeof root !== "object") {
           setLatest(EMPTY_READING);
@@ -372,12 +401,33 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
           return;
         }
 
-        // If your ESP32 stores readings under /sensors, use that.
-        // Otherwise use the database root directly.
         const source =
           root.sensors && typeof root.sensors === "object"
             ? root.sensors
             : root;
+
+        // Some ESP32 payloads do not include updatedAt/timestamp. Use the
+        // sensor payload as a fallback heartbeat so threshold notifications
+        // still work with those devices.
+        const heartbeat = source.updatedAt ?? source.timestamp ?? root.updatedAt ?? JSON.stringify({
+          pm1: source.pm1,
+          pm25: source.pm25,
+          pm10: source.pm10,
+          temperature: source.temperature,
+          humidity: source.humidity,
+          co2: source.co2 ?? source.co2Equivalent,
+          voc: source.voc ?? source.vocEquivalent,
+          iaq: source.iaq ?? source.iaqScore ?? source.airQualityIndex ?? source.IAQ,
+        });
+
+        // Process the first real Firebase snapshot immediately. This lets the
+        // user section evaluate thresholds as soon as it opens.
+        const isInitialSnapshot = isInitialFirebaseSnapshotRef.current;
+        isInitialFirebaseSnapshotRef.current = false;
+        if (!isInitialSnapshot && heartbeat === lastHeartbeatValueRef.current) return;
+
+        lastHeartbeatValueRef.current = heartbeat;
+        lastTelemetryTimeRef.current = Date.now();
 
         const toNumberOrNull = (value) => {
           if (value === null || value === undefined || value === "") return null;
@@ -395,9 +445,10 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
           temperature: toNumberOrNull(source.temperature),
           humidity: toNumberOrNull(source.humidity),
 
-          iaq: toNumberOrNull(source.iaq ?? source.iaqScore),
           co2: toNumberOrNull(source.co2 ?? source.co2Equivalent),
           voc: toNumberOrNull(source.voc ?? source.vocEquivalent),
+          // IAQ is a sensor value. Never derive or randomize it in the UI.
+          iaq: toNumberOrNull(source.iaq ?? source.iaqScore ?? source.airQualityIndex ?? source.IAQ),
 
           calibrating:
             source.calibrating !== undefined
@@ -413,6 +464,7 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
         };
 
         setLatest(nextReading);
+        setConnectionStatus("connected");
 
         // ---------------------------------------------------
         // GPS
@@ -424,51 +476,35 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
 
         if (gpsSource) {
           setGps({
-            lat: toNumberOrNull(
-              gpsSource.latitude ?? gpsSource.lat
-            ),
-            lng: toNumberOrNull(
-              gpsSource.longitude ?? gpsSource.lng ?? gpsSource.lon
-            ),
-            alt: toNumberOrNull(
-              gpsSource.altitude ?? gpsSource.alt
-            ),
+            lat: toNumberOrNull(gpsSource.latitude ?? gpsSource.lat),
+            lng: toNumberOrNull(gpsSource.longitude ?? gpsSource.lng ?? gpsSource.lon),
+            alt: toNumberOrNull(gpsSource.altitude ?? gpsSource.alt),
             speed: toNumberOrNull(gpsSource.speed),
             course: toNumberOrNull(gpsSource.course),
-            sats: toNumberOrNull(
-              gpsSource.satellites ?? gpsSource.sats
-            ),
+            sats: toNumberOrNull(gpsSource.satellites ?? gpsSource.sats),
             hdop: toNumberOrNull(gpsSource.hdop),
             fix: gpsSource.fix ?? null,
             time: gpsSource.time ?? null,
           });
+        } else if (source.latitude !== undefined || source.longitude !== undefined) {
+          setGps({
+            lat: toNumberOrNull(source.latitude),
+            lng: toNumberOrNull(source.longitude),
+            alt: toNumberOrNull(source.altitude),
+            speed: toNumberOrNull(source.speed),
+            course: toNumberOrNull(source.course),
+            sats: toNumberOrNull(source.satellites),
+            hdop: toNumberOrNull(source.hdop),
+            fix:
+              source.gpsValid === true
+                ? "Valid"
+                : source.gpsValid === false
+                  ? "No Fix"
+                  : null,
+            time: source.gpsTime ?? null,
+          });
         } else {
-          // Also support flat GPS fields.
-          const hasFlatGps =
-            source.latitude !== undefined ||
-            source.longitude !== undefined ||
-            source.gpsValid !== undefined;
-
-          if (hasFlatGps) {
-            setGps({
-              lat: toNumberOrNull(source.latitude),
-              lng: toNumberOrNull(source.longitude),
-              alt: toNumberOrNull(source.altitude),
-              speed: toNumberOrNull(source.speed),
-              course: toNumberOrNull(source.course),
-              sats: toNumberOrNull(source.satellites),
-              hdop: toNumberOrNull(source.hdop),
-              fix:
-                source.gpsValid === true
-                  ? "Valid"
-                  : source.gpsValid === false
-                    ? "No Fix"
-                    : null,
-              time: source.gpsTime ?? null,
-            });
-          } else {
-            setGps(EMPTY_GPS);
-          }
+          setGps(EMPTY_GPS);
         }
 
         // ---------------------------------------------------
@@ -510,9 +546,7 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
     return () => unsubscribe();
   }, []);
 
-  // Read directly from the main ESP32 as well. This is needed when the
-  // dashboard is running on the same LAN but the board cannot reach Firebase
-  // (and also makes the IP field above actually functional).
+  // Direct ESP32 IP polling when configured
   React.useEffect(() => {
     if (!esp32Ip) return undefined;
 
@@ -534,22 +568,25 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
         const readings = await readingsResponse.json();
         if (stopped) return;
 
-        setLatest((previous) => ({
-          ...previous,
+        const nextReading = {
+          ...EMPTY_READING,
           pm1: toNumberOrNull(readings.pm1),
           pm25: toNumberOrNull(readings.pm25),
           pm10: toNumberOrNull(readings.pm10),
           temperature: toNumberOrNull(readings.temperature),
           humidity: toNumberOrNull(readings.humidity),
-          iaq: toNumberOrNull(readings.iaq ?? readings.iaqScore),
           co2: toNumberOrNull(readings.co2 ?? readings.co2Equivalent),
           voc: toNumberOrNull(readings.voc ?? readings.vocEquivalent),
+          // Direct ESP32 polling uses the same raw IAQ value as Firebase.
+          iaq: toNumberOrNull(readings.iaq ?? readings.iaqScore ?? readings.airQualityIndex ?? readings.IAQ),
           calibrating: Boolean(readings.calibrating),
           iaqAccuracyText: readings.iaqAccuracyText ?? readings.iaqAccuracy ?? null,
           ip: readings.ip ?? esp32Ip,
           uptime: toNumberOrNull(readings.uptime),
           status: readings.status ?? null,
-        }));
+        };
+
+        setLatest(nextReading);
 
         if (readings.camIp) setCamIp(String(readings.camIp));
         if (readings.cameraOnline !== undefined) setCameraOnline(Boolean(readings.cameraOnline));
@@ -576,12 +613,18 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
           console.debug("ESP32 GPS unavailable:", gpsError);
         }
 
-        lastFirebaseUpdate.current = Date.now();
+        lastTelemetryTimeRef.current = Date.now();
         setConnectionStatus("connected");
       } catch (error) {
         if (!stopped) {
           console.debug("ESP32 readings unavailable:", error);
-          setConnectionStatus("error");
+          if (Date.now() - lastTelemetryTimeRef.current > 15000) {
+            setConnectionStatus("error");
+            setLatest(EMPTY_READING);
+            setGps(EMPTY_GPS);
+            setCameraOnline(false);
+            setCamIp(null);
+          }
         }
       }
     };
@@ -596,38 +639,42 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
   }, [esp32Ip]);
 
   // =========================================================
-  // ESP32 CONNECTION TIMEOUT
-  // If Firebase stops receiving ESP32 updates for 15 seconds,
-  // consider the ESP32 disconnected and clear old readings.
+  // ESP32 CONNECTION TIMEOUT WATCHDOG
+  // 15 seconds without fresh telemetry -> mark disconnected
+  // and clear stale sensor readings from live dashboard.
   // =========================================================
   React.useEffect(() => {
     const checkConnection = setInterval(() => {
-      const lastUpdate = lastFirebaseUpdate.current;
+      const lastTelemetry = lastTelemetryTimeRef.current;
 
-      // No Firebase data has arrived yet
-      if (lastUpdate === 0) {
+      if (lastTelemetry === 0) {
+        // No fresh telemetry has arrived yet since page load
+        if (connectionStatus === "connected") {
+          setConnectionStatus("disconnected");
+          setLatest(EMPTY_READING);
+          setGps(EMPTY_GPS);
+          setCameraOnline(false);
+          setCamIp(null);
+        }
         return;
       }
 
-      const timeSinceLastUpdate = Date.now() - lastUpdate;
+      const elapsed = Date.now() - lastTelemetry;
 
-      // ESP32 normally updates every few seconds.
-      // 15 seconds without an update = disconnected.
-      if (timeSinceLastUpdate > 15000) {
-        setConnectionStatus("disconnected");
-
-        // Clear stale sensor values
-        setLatest(EMPTY_READING);
-        setGps(EMPTY_GPS);
-
-        // Clear camera status
-        setCameraOnline(false);
-        setCamIp(null);
+      if (elapsed > 15000) {
+        if (connectionStatus !== "disconnected") {
+          setConnectionStatus("disconnected");
+          setLatest(EMPTY_READING);
+          setGps(EMPTY_GPS);
+          setCameraOnline(false);
+          setCamIp(null);
+        }
       }
-    }, 3000);
+    }, 1500);
 
     return () => clearInterval(checkConnection);
-  }, []);
+  }, [connectionStatus]);
+
   // Roll a PM history buffer for the Air Quality chart — only once real
   // readings start arriving.
   React.useEffect(() => {
@@ -674,7 +721,9 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
 
   const alerts = React.useMemo(() => buildAlerts(latest, alertSettings), [latest, alertSettings]);
 
-  // Debounced notification dispatch for critical sensor thresholds & safety
+  // Environmental threshold notifications are created by the backend from
+  // fresh RTDB telemetry and broadcast once to all applicable users. The
+  // client keeps only the existing local safety/device notifications here.
   React.useEffect(() => {
     if (!currentUser?.id) return;
     const now = Date.now();
@@ -688,25 +737,6 @@ export default function LiveReadingPage({ currentUser, onLogout, onBackToSite, o
         setClearedAlerts(false);
       }
     }
-
-    activeAlerts.forEach((alert) => {
-      const key = `${alert.title}_${alert.level}`;
-      const lastSent = lastAlertsSentRef.current[key] || 0;
-      // 10-minute cooldown per specific sensor alert to prevent spamming
-      if (now - lastSent > 600000) {
-        lastAlertsSentRef.current[key] = now;
-        createNotification({
-          type: "alert",
-          title: alert.title,
-          message: alert.message,
-          severity: String(alert.level).toLowerCase(),
-          recipientType: "user",
-          recipientId: currentUser.id,
-          createdAt: now,
-          soundType: String(alert.level).toLowerCase() === "danger" ? "danger" : "warning",
-        });
-      }
-    });
 
     // Fire detection if reported by live reading
     if (latest.fire || latest.flame) {

@@ -119,61 +119,164 @@ function buildPath(points) {
 }
 
 
-const ALERT_SENSOR_KEYS = ["pm25", "pm10", "iaq", "co2", "voc", "humidity", "temperature"];
+const ALERT_SENSOR_KEYS = ["pm1", "pm25", "pm10", "iaq", "co2", "voc", "humidity", "temperature"];
 
 function hasSensorReadings(reading) {
-  return ALERT_SENSOR_KEYS.some((key) => reading?.[key] !== null && reading?.[key] !== undefined && reading?.[key] !== "" && Number.isFinite(Number(reading[key])));
+  if (!reading || typeof reading !== "object") return false;
+  return ALERT_SENSOR_KEYS.some((key) => reading[key] !== null && reading[key] !== undefined && reading[key] !== "" && Number.isFinite(Number(reading[key])));
 }
 
-function buildAlerts(d, s) {
+function getThresholdFor(thresholds, sensorName) {
+  if (!thresholds) return null;
+  if (Array.isArray(thresholds)) {
+    return thresholds.find((t) => String(t.sensor).toLowerCase() === sensorName.toLowerCase()) || null;
+  }
+  if (typeof thresholds === "object") {
+    return thresholds[sensorName] || thresholds[sensorName.toLowerCase()] || null;
+  }
+  return null;
+}
+
+function parseNum(val) {
+  if (val === null || val === undefined || val === "") return null;
+  const n = Number(val);
+  return Number.isFinite(n) ? n : null;
+}
+
+function buildAlerts(d, thresholds) {
   const list = [];
+  // The backend threshold response is authoritative. Until it is available,
+  // do not manufacture alert decisions from a frontend default.
+  if (!d || !hasSensorReadings(d) || !Array.isArray(thresholds) || thresholds.length === 0) return list;
+
   const hasReading = (key) => d[key] !== null && d[key] !== undefined && d[key] !== "" && Number.isFinite(Number(d[key]));
-  if (!hasSensorReadings(d)) return list;
 
   function add(icon, title, message, level) {
     list.push({ icon, title, message, level });
   }
 
-  if (hasReading("pm25") && Number(d.pm25) >= s.pm25Danger) {
-    add(<AlertTriangle size={16} />, "PM2.5 danger level", `PM2.5 is ${d.pm25} µg/m³. Consider filtration and ventilation.`, "Danger");
-  } else if (hasReading("pm25") && Number(d.pm25) >= s.pm25Warn) {
-    add(<Wind size={16} />, "PM2.5 warning", `PM2.5 is ${d.pm25} µg/m³. Air quality is becoming unhealthy.`, "Warning");
+  // 1. PM2.5
+  if (hasReading("pm25")) {
+    const v = Number(d.pm25);
+    const th = getThresholdFor(thresholds, "PM2.5") || {};
+    const crit = parseNum(th.critical);
+    const warn = parseNum(th.warning);
+
+    if (crit !== null && v >= crit) {
+      add(<AlertTriangle size={16} />, "PM2.5 danger level", `PM2.5 is ${v} µg/m³. Consider filtration and ventilation.`, "Danger");
+    } else if (warn !== null && v >= warn) {
+      add(<Wind size={16} />, "PM2.5 warning", `PM2.5 is ${v} µg/m³. Air quality is becoming unhealthy.`, "Warning");
+    }
   }
 
-  if (hasReading("pm10") && Number(d.pm10) >= s.pm10Danger) {
-    add(<AlertTriangle size={16} />, "PM10 danger level", `PM10 is ${d.pm10} µg/m³. Dust level is high.`, "Danger");
-  } else if (hasReading("pm10") && Number(d.pm10) >= s.pm10Warn) {
-    add(<Wind size={16} />, "PM10 warning", `PM10 is ${d.pm10} µg/m³. Dust level is above your warning limit.`, "Warning");
+  // 2. PM10
+  if (hasReading("pm10")) {
+    const v = Number(d.pm10);
+    const th = getThresholdFor(thresholds, "PM10") || {};
+    const crit = parseNum(th.critical);
+    const warn = parseNum(th.warning);
+
+    if (crit !== null && v >= crit) {
+      add(<AlertTriangle size={16} />, "PM10 danger level", `PM10 is ${v} µg/m³. Dust level is high.`, "Danger");
+    } else if (warn !== null && v >= warn) {
+      add(<Wind size={16} />, "PM10 warning", `PM10 is ${v} µg/m³. Dust level is above your warning limit.`, "Warning");
+    }
   }
 
-  if (hasReading("iaq") && Number(d.iaq) >= s.iaqDanger) {
-    add(<AlertTriangle size={16} />, "IAQ danger level", `IAQ is ${Number(d.iaq).toFixed(0)}. Indoor air quality is unhealthy.`, "Danger");
-  } else if (hasReading("iaq") && Number(d.iaq) >= s.iaqWarn) {
-    add(<Activity size={16} />, "IAQ warning", `IAQ is ${Number(d.iaq).toFixed(0)}. Air quality needs attention.`, "Warning");
+  // 3. PM1.0
+  if (hasReading("pm1")) {
+    const v = Number(d.pm1);
+    const th = getThresholdFor(thresholds, "PM1.0") || {};
+    const crit = parseNum(th.critical);
+    const warn = parseNum(th.warning);
+
+    if (crit !== null && v >= crit) {
+      add(<AlertTriangle size={16} />, "PM1.0 danger level", `PM1.0 is ${v} µg/m³. Very high particulate level.`, "Danger");
+    } else if (warn !== null && v >= warn) {
+      add(<Wind size={16} />, "PM1.0 warning", `PM1.0 is ${v} µg/m³. Elevated particulate level.`, "Warning");
+    }
   }
 
-  if (hasReading("co2") && Number(d.co2) >= s.co2Danger) {
-    add(<AlertTriangle size={16} />, "CO2 danger level", `CO2 equivalent is ${Number(d.co2).toFixed(0)} ppm. Improve ventilation immediately.`, "Danger");
-  } else if (hasReading("co2") && Number(d.co2) >= s.co2Warn) {
-    add(<Gauge size={16} />, "CO2 warning", `CO2 equivalent is ${Number(d.co2).toFixed(0)} ppm. Ventilation may be low.`, "Warning");
+  // 4. CO2
+  if (hasReading("co2")) {
+    const v = Number(d.co2);
+    const th = getThresholdFor(thresholds, "CO2") || {};
+    const crit = parseNum(th.critical);
+    const warn = parseNum(th.warning);
+
+    if (crit !== null && v >= crit) {
+      add(<AlertTriangle size={16} />, "CO2 danger level", `CO2 equivalent is ${v.toFixed(0)} ppm. Improve ventilation immediately.`, "Danger");
+    } else if (warn !== null && v >= warn) {
+      add(<Gauge size={16} />, "CO2 warning", `CO2 equivalent is ${v.toFixed(0)} ppm. Ventilation may be low.`, "Warning");
+    }
   }
 
-  if (hasReading("voc") && Number(d.voc) >= s.vocDanger) {
-    add(<AlertTriangle size={16} />, "VOC danger level", `VOC equivalent is ${Number(d.voc).toFixed(2)} ppm. Possible chemical or odor source nearby.`, "Danger");
-  } else if (hasReading("voc") && Number(d.voc) >= s.vocWarn) {
-    add(<Activity size={16} />, "VOC warning", `VOC equivalent is ${Number(d.voc).toFixed(2)} ppm. Check for perfumes, smoke, cleaners or solvents.`, "Warning");
+  // 5. VOC
+  if (hasReading("voc")) {
+    const v = Number(d.voc);
+    const th = getThresholdFor(thresholds, "VOC") || {};
+    const crit = parseNum(th.critical);
+    const warn = parseNum(th.warning);
+
+    if (crit !== null && v >= crit) {
+      add(<AlertTriangle size={16} />, "VOC danger level", `VOC equivalent is ${v.toFixed(2)} ppm. Possible chemical or odor source nearby.`, "Danger");
+    } else if (warn !== null && v >= warn) {
+      add(<Activity size={16} />, "VOC warning", `VOC equivalent is ${v.toFixed(2)} ppm. Check for perfumes, smoke, cleaners or solvents.`, "Warning");
+    }
   }
 
-  if (hasReading("humidity") && Number(d.humidity) < s.humMin) {
-    add(<Droplets size={16} />, "Low humidity", `Humidity is ${Number(d.humidity).toFixed(0)}%. Air may feel dry.`, "Warning");
-  } else if (hasReading("humidity") && Number(d.humidity) > s.humMax) {
-    add(<Droplets size={16} />, "High humidity", `Humidity is ${Number(d.humidity).toFixed(0)}%. Risk of discomfort or moisture buildup.`, "Warning");
+  // 6. Temperature (minimum / maximum / critical / warning)
+  if (hasReading("temperature")) {
+    const v = Number(d.temperature);
+    const th = getThresholdFor(thresholds, "Temperature") || {};
+    const crit = parseNum(th.critical);
+    const warn = parseNum(th.warning);
+    const min = parseNum(th.minimum);
+    const max = parseNum(th.maximum);
+
+    if (crit !== null && v >= crit) {
+      add(<AlertTriangle size={16} />, "High temperature danger", `Temperature is ${v.toFixed(1)} °C. Room exceeds critical thermal threshold.`, "Danger");
+    } else if (max !== null && v > max) {
+      add(<Thermometer size={16} />, "High temperature", `Temperature is ${v.toFixed(1)} °C. Room is above comfort limit.`, "Warning");
+    } else if (min !== null && v < min) {
+      add(<Thermometer size={16} />, "Low temperature", `Temperature is ${v.toFixed(1)} °C. Room is below comfort limit.`, "Warning");
+    } else if (warn !== null && v >= warn) {
+      add(<Thermometer size={16} />, "Temperature warning", `Temperature is ${v.toFixed(1)} °C. Temperature is elevated.`, "Warning");
+    }
   }
 
-  if (hasReading("temperature") && Number(d.temperature) < s.tempMin) {
-    add(<Thermometer size={16} />, "Low temperature", `Temperature is ${Number(d.temperature).toFixed(1)} °C. Room is below comfort limit.`, "Warning");
-  } else if (hasReading("temperature") && Number(d.temperature) > s.tempMax) {
-    add(<Thermometer size={16} />, "High temperature", `Temperature is ${Number(d.temperature).toFixed(1)} °C. Room is above comfort limit.`, "Warning");
+  // 7. Humidity (minimum / maximum / critical / warning)
+  if (hasReading("humidity")) {
+    const v = Number(d.humidity);
+    const th = getThresholdFor(thresholds, "Humidity") || {};
+    const crit = parseNum(th.critical);
+    const warn = parseNum(th.warning);
+    const min = parseNum(th.minimum);
+    const max = parseNum(th.maximum);
+
+    if (crit !== null && v >= crit) {
+      add(<AlertTriangle size={16} />, "High humidity danger", `Humidity is ${v.toFixed(0)}%. Dangerously high moisture level.`, "Danger");
+    } else if (max !== null && v > max) {
+      add(<Droplets size={16} />, "High humidity", `Humidity is ${v.toFixed(0)}%. Risk of discomfort or moisture buildup.`, "Warning");
+    } else if (min !== null && v < min) {
+      add(<Droplets size={16} />, "Low humidity", `Humidity is ${v.toFixed(0)}%. Air may feel dry.`, "Warning");
+    } else if (warn !== null && v >= warn) {
+      add(<Droplets size={16} />, "Humidity warning", `Humidity is ${v.toFixed(0)}%. Moisture level is elevated.`, "Warning");
+    }
+  }
+
+  // 8. IAQ, when supplied by the sensor, follows its saved warning/critical limits.
+  if (hasReading("iaq")) {
+    const v = Number(d.iaq);
+    const th = getThresholdFor(thresholds, "IAQ") || {};
+    const crit = parseNum(th.critical);
+    const warn = parseNum(th.warning);
+
+    if (crit !== null && v >= crit) {
+      add(<AlertTriangle size={16} />, "IAQ danger level", `IAQ is ${v.toFixed(0)}. Indoor air quality is unhealthy.`, "Danger");
+    } else if (warn !== null && v >= warn) {
+      add(<Activity size={16} />, "IAQ warning", `IAQ is ${v.toFixed(0)}. Air quality needs attention.`, "Warning");
+    }
   }
 
   if (list.length === 0) {
@@ -188,8 +291,6 @@ function buildAlerts(d, s) {
   return list;
 }
 
-
-
 const NAV_ITEMS = [
   { id: "overview", label: "Overview", icon: <Activity size={15} /> },
   { id: "airquality", label: "Air Quality", icon: <Wind size={15} /> },
@@ -200,22 +301,7 @@ const NAV_ITEMS = [
   { id: "alerts", label: "Alerts", icon: <Bell size={15} /> },
 ];
 
-const DEFAULT_ALERT_SETTINGS = {
-  pm25Warn: 35,
-  pm25Danger: 55,
-  pm10Warn: 80,
-  pm10Danger: 150,
-  iaqWarn: 100,
-  iaqDanger: 200,
-  co2Warn: 1000,
-  co2Danger: 2000,
-  vocWarn: 1.0,
-  vocDanger: 2.0,
-  humMin: 30,
-  humMax: 70,
-  tempMin: 18,
-  tempMax: 32,
-};
+const DEFAULT_ALERT_SETTINGS = [];
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || (import.meta.env.DEV ? "" : "http://127.0.0.1:5000");
 const BACKEND_DISPLAY_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";

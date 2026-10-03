@@ -333,12 +333,18 @@ export default function AdminPage({ onBackToSite, onBackToLogin, onLogout }) {
 
   const saveThresholds = async () => {
     try {
+      const parseThreshold = (value, sensor, field) => {
+        if (value === "" || value === null || value === undefined) return null;
+        const number = Number(value);
+        if (!Number.isFinite(number)) throw new Error(`${sensor} ${field} must be numeric or blank.`);
+        return number;
+      };
       const payload = thresholdDraft.map((row) => ({
         sensor: row.sensor,
-        warning: row.warning === "" ? null : Number(row.warning),
-        critical: row.critical === "" ? null : Number(row.critical),
-        minimum: row.minimum === "" ? null : Number(row.minimum),
-        maximum: row.maximum === "" ? null : Number(row.maximum),
+        warning: parseThreshold(row.warning, row.sensor, "warning"),
+        critical: parseThreshold(row.critical, row.sensor, "critical"),
+        minimum: parseThreshold(row.minimum, row.sensor, "minimum"),
+        maximum: parseThreshold(row.maximum, row.sensor, "maximum"),
         unit: row.unit || "",
       }));
       const result = await adminFetch("/admin/api/thresholds", {
@@ -668,11 +674,9 @@ export default function AdminPage({ onBackToSite, onBackToLogin, onLogout }) {
 
         <nav className="sc-admin-nav">
           <div className="sc-admin-nav-group">
-            <span>OVERVIEW</span>
             <button className={workspace === "overview" ? "active" : ""} onClick={() => setWorkspaceAndClose("overview")}><Activity size={16} />Dashboard</button>
           </div>
           <div className="sc-admin-nav-group">
-            <span>OPERATIONS</span>
             <button className={workspace === "operations" ? "active" : ""} onClick={() => setWorkspaceAndClose("operations")}><Navigation size={16} />Live Operations</button>
           </div>
           <div className="sc-admin-nav-group">
@@ -963,4 +967,3 @@ export default function AdminPage({ onBackToSite, onBackToLogin, onLogout }) {
     </div>
   );
 }
-

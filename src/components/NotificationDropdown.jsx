@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Bell,
   AlertTriangle,
@@ -7,13 +7,13 @@ import {
   Camera,
   Activity,
   ShieldCheck,
-  Check,
+  X,
   Volume2,
   VolumeX,
 } from "lucide-react";
 import {
   markNotificationAsRead,
-  markAllNotificationsAsRead,
+  clearAllNotificationsForUser,
   isSoundEnabled,
   setSoundEnabled,
 } from "../lib/notificationService";
@@ -81,8 +81,8 @@ export default function NotificationDropdown({
     setSoundEnabled(next);
   };
 
-  const handleMarkAllRead = async () => {
-    await markAllNotificationsAsRead(notifications, userId || (isAdmin ? "admin" : "guest"));
+  const handleClearAll = async () => {
+    await clearAllNotificationsForUser(notifications, userId || (isAdmin ? "admin" : "guest"));
   };
 
   const handleClickItem = async (notif) => {
@@ -135,14 +135,15 @@ export default function NotificationDropdown({
               >
                 {soundOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
               </button>
-              {unreadCount > 0 && (
+              {notifications.length > 0 && (
                 <button
                   type="button"
-                  className="notif-mark-all"
-                  onClick={handleMarkAllRead}
+                  className="notif-clear-all"
+                  onClick={handleClearAll}
+                  title="Clear notifications"
+                  aria-label="Clear notifications"
                 >
-                  <Check size={13} />
-                  <span>Mark all as read</span>
+                  <X size={16} />
                 </button>
               )}
             </div>

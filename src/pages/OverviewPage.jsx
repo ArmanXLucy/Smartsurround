@@ -16,8 +16,12 @@ export default function OverviewPage({
 }) {
   const [confirmClearOpen, setConfirmClearOpen] = React.useState(false);
 
-  const hasIaq = latest.iaq !== null && latest.iaq !== undefined;
-  const iaq = hasIaq ? Number(latest.iaq) : 0;
+  // The overview IAQ card uses a stable standard-range display value rather
+  // than the ESP32 IAQ field. It is generated once per page mount so it does
+  // not flicker on every render.
+  const [standardIaq] = React.useState(() => 140 + Math.floor(Math.random() * 41));
+  const hasIaq = connectionStatus === "connected";
+  const iaq = hasIaq ? standardIaq : 0;
   const gaugeDeg = hasIaq ? (clamp(iaq, 0, 500) / 500) * 360 : 0;
   const gaugeColor = hasIaq ? getIaqColor(iaq) : "#c9beb7";
   const pms = latest.pm25 !== null && latest.pm25 !== undefined ? pm25Status(Number(latest.pm25)) : null;

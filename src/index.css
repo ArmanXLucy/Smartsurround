@@ -8032,9 +8032,10 @@ svg {
   display: flex;
   flex-direction: column;
   padding: 22px 14px 14px;
-  background: #21140f;
-  color: rgba(255,255,255,0.72);
-  box-shadow: 14px 0 40px rgba(33,20,15,0.08);
+  background: var(--cream);
+  color: var(--muted);
+  border-right: 1px solid var(--border);
+  box-shadow: 14px 0 40px rgba(33,20,15,0.04);
 }
 
 .sc-admin-brand {
@@ -8042,7 +8043,7 @@ svg {
   align-items: center;
   gap: 11px;
   padding: 0 10px 22px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid var(--border);
 }
 .sc-admin-brand-mark {
   width: 36px;
@@ -8051,7 +8052,7 @@ svg {
   place-items: center;
   flex: 0 0 36px;
   border-radius: 11px;
-  color: white;
+  color: var(--text);
   background: var(--orange);
 }
 .sc-admin-brand strong {
@@ -8060,11 +8061,11 @@ svg {
   font-size: 14px;
   letter-spacing: -0.02em;
 }
-.sc-admin-brand strong span { font-weight: 400; opacity: .7; }
+.sc-admin-brand strong span { font-weight: 400; color: var(--muted); }
 .sc-admin-brand small {
   display: block;
   margin-top: 3px;
-  color: rgba(255,255,255,0.38);
+  color: var(--muted);
   font-size: 8px;
   letter-spacing: .12em;
   font-weight: 700;
@@ -8079,7 +8080,7 @@ svg {
 .sc-admin-nav-group > span {
   display: block;
   padding: 0 11px 6px;
-  color: rgba(255,255,255,0.29);
+  color: var(--muted);
   font-size: 8px;
   letter-spacing: .14em;
   font-weight: 700;
@@ -8093,7 +8094,7 @@ svg {
   border: 1px solid transparent;
   border-radius: 10px;
   background: transparent;
-  color: rgba(255,255,255,0.60);
+  color: var(--muted);
   font: inherit;
   font-size: 12px;
   text-align: left;
@@ -8101,24 +8102,24 @@ svg {
   transition: .18s ease;
 }
 .sc-admin-nav-group button:hover {
-  color: white;
-  background: rgba(255,255,255,0.05);
+  color: var(--text);
+  background: rgba(255,116,23,0.07);
 }
 .sc-admin-nav-group button.active {
-  color: white;
-  background: #352118;
-  border-color: rgba(255,255,255,0.06);
-  box-shadow: 0 7px 20px rgba(0,0,0,.16);
+  color: var(--orange);
+  background: rgba(255,116,23,0.12);
+  border-color: rgba(255,116,23,0.22);
+  box-shadow: none;
 }
 .sc-admin-nav-group button svg { flex: 0 0 auto; opacity: .9; }
 
 .sc-admin-sidebar-footer {
   padding: 13px 10px 6px;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid var(--border);
 }
 .sc-admin-sidebar-footer > div span {
   display: block;
-  color: rgba(255,255,255,.32);
+  color: var(--muted);
   font-size: 8px;
   letter-spacing: .12em;
   font-weight: 700;
@@ -8126,7 +8127,7 @@ svg {
 .sc-admin-sidebar-footer > div strong {
   display: block;
   margin-top: 3px;
-  color: rgba(255,255,255,.86);
+  color: var(--text);
   font-size: 12px;
 }
 .sc-admin-sidebar-footer > button {
@@ -8136,21 +8137,21 @@ svg {
   width: 100%;
   margin-top: 11px;
   padding: 9px 10px;
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid var(--border);
   border-radius: 9px;
-  color: rgba(255,255,255,.66);
+  color: var(--muted);
   background: transparent;
   font: inherit;
   font-size: 11px;
   cursor: pointer;
 }
 .sc-admin-sidebar-footer > button:hover {
-  color: white;
+  color: var(--text);
   border-color: rgba(255,116,23,.45);
 }
 .sc-admin-sidebar-footer p {
   margin: 11px 0 0;
-  color: rgba(255,255,255,.30);
+  color: var(--muted);
   font-size: 9px;
   line-height: 1.6;
 }
@@ -8972,20 +8973,21 @@ svg {
   cursor: pointer;
 }
 .notif-sound-toggle:hover { color: var(--text); background: rgba(33,20,15,.05); }
-.notif-mark-all {
-  display: flex;
+.notif-clear-all {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
   align-items: center;
-  gap: 4px;
   border: 0;
   background: transparent;
-  color: var(--orange, #ea580c);
-  font-size: 10px;
-  font-weight: 600;
+  color: #dc2626;
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 4px;
   border-radius: 4px;
+  transition: all 0.15s ease;
 }
-.notif-mark-all:hover { background: rgba(234,88,12,.08); }
+.notif-clear-all:hover { background: rgba(220,38,38,.1); color: #b91c1c; }
 .notif-dropdown-list {
   overflow-y: auto;
   max-height: 380px;
