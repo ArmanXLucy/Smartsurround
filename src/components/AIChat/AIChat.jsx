@@ -1,8 +1,7 @@
 import { useState } from "react";
 import "./AIChat.css";
 
-const API_URL =
-  import.meta.env.VITE_AI_API_URL || "http://16.178.41.118:8000";
+const API_URL = "/api";
 
 export default function AIChat() {
   const [open, setOpen] = useState(false);
